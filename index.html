@@ -99,7 +99,6 @@
             <nav class="hidden md:flex items-center gap-8 font-medium text-sm text-gray-200">
                 <a href="#inicio" class="hover:text-[#00f2fe] transition-colors">Inicio</a>
                 <a href="#canales" class="hover:text-[#00f2fe] transition-colors">Canales</a>
-                <a href="#clips" class="hover:text-[#00f2fe] transition-colors">Clips y Vídeos</a>
                 <a href="#calendario" class="hover:text-[#00f2fe] transition-colors">Horarios</a>
                 <a href="#setup" class="hover:text-[#00f2fe] transition-colors">Setup</a>
                 <a href="#contacto" class="hover:text-[#00f2fe] transition-colors">Contacto</a>
@@ -122,7 +121,6 @@
         <div id="mobile-menu" class="hidden md:hidden glass-card border-t border-gray-800 px-6 py-6 flex flex-col gap-4 text-base font-medium text-gray-200">
             <a href="#inicio" onclick="toggleMobileMenu()" class="hover:text-[#00f2fe]">Inicio</a>
             <a href="#canales" onclick="toggleMobileMenu()" class="hover:text-[#00f2fe]">Canales</a>
-            <a href="#clips" onclick="toggleMobileMenu()" class="hover:text-[#00f2fe]">Clips y Vídeos</a>
             <a href="#calendario" onclick="toggleMobileMenu()" class="hover:text-[#00f2fe]">Horarios</a>
             <a href="#setup" onclick="toggleMobileMenu()" class="hover:text-[#00f2fe]">Setup</a>
             <a href="#contacto" onclick="toggleMobileMenu()" class="hover:text-[#00f2fe]">Contacto</a>
@@ -196,7 +194,7 @@
                 MIS <span class="gradient-text">CANALES OFICIALES</span>
             </h2>
             <p class="text-gray-300 max-w-xl mx-auto text-sm sm:text-base">
-                Sígeme en mis tres plataformas principales para no perderte ningún directo, vídeo exclusivo o clip viral.
+                Sígueme en mis tres plataformas principales para no perderte ningún directo, vídeo exclusivo o clip viral.
             </p>
         </div>
 
@@ -253,82 +251,6 @@
                     <a href="https://www.tiktok.com/@morvehtv" target="_blank" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-pink-600 to-purple-600 text-white font-bold text-xs uppercase tracking-wider hover:opacity-90 transition-colors">
                         Seguir <i class="fa-solid fa-arrow-right ml-1"></i>
                     </a>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Clips & Videos Section -->
-    <section id="clips" class="py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto border-t border-gray-800/80">
-        <div class="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
-            <div>
-                <h2 class="font-orbitron font-black text-3xl sm:text-4xl uppercase mb-3 text-white">
-                    CLIPS Y <span class="gradient-text">VÍDEOS DESTACADOS</span>
-                </h2>
-                <p class="text-gray-300 text-sm sm:text-base">Los mejores momentos de las transmisiones en Starvios y TikTok.</p>
-            </div>
-            <!-- Filter Tabs -->
-            <div class="flex flex-wrap gap-2 bg-black/40 p-1.5 rounded-xl border border-gray-800">
-                <button onclick="filterMedia('all')" class="filter-btn px-4 py-2 rounded-lg text-xs font-bold uppercase transition-all bg-[#00f2fe] text-black" data-filter="all">Todos</button>
-                <button onclick="filterMedia('starvios')" class="filter-btn px-4 py-2 rounded-lg text-xs font-bold uppercase transition-all text-gray-300 hover:text-white" data-filter="starvios">Starvios Clips</button>
-                <button onclick="filterMedia('youtube')" class="filter-btn px-4 py-2 rounded-lg text-xs font-bold uppercase transition-all text-gray-300 hover:text-white" data-filter="youtube">YouTube</button>
-                <button onclick="filterMedia('tiktok')" class="filter-btn px-4 py-2 rounded-lg text-xs font-bold uppercase transition-all text-gray-300 hover:text-white" data-filter="tiktok">TikTok</button>
-            </div>
-        </div>
-
-        <!-- Media Grid -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6" id="media-grid">
-            <!-- Item 1 -->
-            <div class="media-card glass-card rounded-2xl overflow-hidden group cursor-pointer border border-gray-800 hover:border-[#00f2fe]/50 transition-all" data-category="starvios" onclick="openVideoModal('Directo Épico en Starvios - ¡Remontada en la última curva!', 'https://www.w3schools.com/html/mov_bbb.mp4')">
-                <div class="relative aspect-video bg-gray-900 overflow-hidden">
-                    <img src="https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80&w=800&auto=format&fit=crop" alt="Stream" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-80">
-                    <div class="absolute inset-0 bg-gradient-to-t from-[#090d16] via-transparent to-transparent"></div>
-                    <span class="absolute top-3 left-3 px-2.5 py-1 rounded-md text-[10px] font-bold uppercase bg-[#00f2fe] text-black">Starvios Clip</span>
-                    <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/40">
-                        <div class="w-12 h-12 rounded-full bg-[#00f2fe] text-black flex items-center justify-center text-lg shadow-lg glow-starvios">
-                            <i class="fa-solid fa-play ml-0.5"></i>
-                        </div>
-                    </div>
-                </div>
-                <div class="p-5">
-                    <h4 class="font-orbitron font-bold text-base mb-1 text-white group-hover:text-[#00f2fe] transition-colors">Remontada legendaria en SimRacing</h4>
-                    <p class="text-xs text-gray-300">De última posición a podio en la última vuelta.</p>
-                </div>
-            </div>
-
-            <!-- Item 2 -->
-            <div class="media-card glass-card rounded-2xl overflow-hidden group cursor-pointer border border-gray-800 hover:border-[#00f2fe]/50 transition-all" data-category="youtube" onclick="openVideoModal('Setup Tour 2026 - Mi nuevo estudio de streaming', 'https://www.w3schools.com/html/mov_bbb.mp4')">
-                <div class="relative aspect-video bg-gray-900 overflow-hidden">
-                    <img src="https://images.unsplash.com/photo-1550745165-9bc0b252726f?q=80&w=800&auto=format&fit=crop" alt="Stream" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-80">
-                    <div class="absolute inset-0 bg-gradient-to-t from-[#090d16] via-transparent to-transparent"></div>
-                    <span class="absolute top-3 left-3 px-2.5 py-1 rounded-md text-[10px] font-bold uppercase bg-red-600 text-white">YouTube</span>
-                    <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/40">
-                        <div class="w-12 h-12 rounded-full bg-[#00f2fe] text-black flex items-center justify-center text-lg shadow-lg glow-starvios">
-                            <i class="fa-solid fa-play ml-0.5"></i>
-                        </div>
-                    </div>
-                </div>
-                <div class="p-5">
-                    <h4 class="font-orbitron font-bold text-base mb-1 text-white group-hover:text-[#00f2fe] transition-colors">Setup Tour 2026 - Mi estudio</h4>
-                    <p class="text-xs text-gray-300">Descubre todo el hardware y volante de simulación.</p>
-                </div>
-            </div>
-
-            <!-- Item 3 -->
-            <div class="media-card glass-card rounded-2xl overflow-hidden group cursor-pointer border border-gray-800 hover:border-[#00f2fe]/50 transition-all" data-category="tiktok" onclick="openVideoModal('TikTok Viral - El bug más gracioso del juego', 'https://www.w3schools.com/html/mov_bbb.mp4')">
-                <div class="relative aspect-video bg-gray-900 overflow-hidden">
-                    <img src="https://images.unsplash.com/photo-1511512578047-dfb367046420?q=80&w=800&auto=format&fit=crop" alt="Stream" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-80">
-                    <div class="absolute inset-0 bg-gradient-to-t from-[#090d16] via-transparent to-transparent"></div>
-                    <span class="absolute top-3 left-3 px-2.5 py-1 rounded-md text-[10px] font-bold uppercase bg-pink-600 text-white">TikTok</span>
-                    <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/40">
-                        <div class="w-12 h-12 rounded-full bg-[#00f2fe] text-black flex items-center justify-center text-lg shadow-lg glow-starvios">
-                            <i class="fa-solid fa-play ml-0.5"></i>
-                        </div>
-                    </div>
-                </div>
-                <div class="p-5">
-                    <h4 class="font-orbitron font-bold text-base mb-1 text-white group-hover:text-[#00f2fe] transition-colors">¡El bug más gracioso en directo!</h4>
-                    <p class="text-xs text-gray-300">Reacciones incontrolables con la comunidad.</p>
                 </div>
             </div>
         </div>
@@ -503,23 +425,6 @@
         </button>
     </footer>
 
-    <!-- Video Modal Viewer -->
-    <div id="video-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 backdrop-blur-md p-4">
-        <div class="glass-card rounded-3xl max-w-3xl w-full p-6 border border-gray-800 relative">
-            <button onclick="closeVideoModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white text-xl p-2">
-                <i class="fa-solid fa-xmark"></i>
-            </button>
-            <h3 id="modal-title" class="font-orbitron font-bold text-lg mb-4 text-white pr-8">Título del vídeo</h3>
-            <div class="aspect-video bg-black rounded-xl overflow-hidden mb-4 border border-gray-800 flex items-center justify-center relative">
-                <video id="modal-video-player" controls autoplay class="w-full h-full object-cover">
-                    <source src="" type="video/mp4">
-                    Tu navegador no soporta vídeos HTML5.
-                </video>
-            </div>
-            <p class="text-xs text-gray-300">Reproduciendo contenido oficial de MorvehTV.</p>
-        </div>
-    </div>
-
     <!-- Export / GitHub Modal -->
     <div id="export-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 backdrop-blur-md p-4">
         <div class="glass-card rounded-3xl max-w-3xl w-full p-6 sm:p-8 border border-[#00f2fe]/40 relative max-h-[90vh] overflow-y-auto">
@@ -601,43 +506,6 @@
             }, 1000);
         }
         updateCountdown();
-
-        function filterMedia(category) {
-            const cards = document.querySelectorAll('.media-card');
-            const buttons = document.querySelectorAll('.filter-btn');
-
-            buttons.forEach(btn => {
-                if (btn.dataset.filter === category) {
-                    btn.className = "filter-btn px-4 py-2 rounded-lg text-xs font-bold uppercase transition-all bg-[#00f2fe] text-black";
-                } else {
-                    btn.className = "filter-btn px-4 py-2 rounded-lg text-xs font-bold uppercase transition-all text-gray-300 hover:text-white";
-                }
-            });
-
-            cards.forEach(card => {
-                if (category === 'all' || card.dataset.category === category) {
-                    card.style.display = 'block';
-                } else {
-                    card.style.display = 'none';
-                }
-            });
-        }
-
-        function openVideoModal(title, videoUrl) {
-            document.getElementById('modal-title').innerText = title;
-            const player = document.getElementById('modal-video-player');
-            player.src = videoUrl;
-            document.getElementById('video-modal').classList.remove('hidden');
-            document.getElementById('video-modal').classList.add('flex');
-        }
-
-        function closeVideoModal() {
-            const player = document.getElementById('modal-video-player');
-            player.pause();
-            player.src = '';
-            document.getElementById('video-modal').classList.add('hidden');
-            document.getElementById('video-modal').classList.remove('flex');
-        }
 
         function openExportModal() {
             document.getElementById('export-modal').classList.remove('hidden');
