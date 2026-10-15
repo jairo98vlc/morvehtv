@@ -108,9 +108,6 @@
                 <button onclick="toggleLiveStatus()" id="status-toggle-btn" class="hidden sm:flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 hover:bg-emerald-500/30 transition-all">
                     <i class="fa-solid fa-circle text-[8px] animate-pulse"></i> Simulador Estado
                 </button>
-                <button onclick="openExportModal()" class="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-red-600 to-red-500 text-white font-bold text-xs uppercase tracking-wider hover:opacity-90 shadow-lg glow-youtube transition-all">
-                    <i class="fa-solid fa-code"></i> Exportar a GitHub
-                </button>
                 <button onclick="toggleMobileMenu()" class="md:hidden text-gray-200 hover:text-red-500 text-xl p-2">
                     <i class="fa-solid fa-bars" id="mobile-menu-icon"></i>
                 </button>
@@ -402,43 +399,7 @@
             <span class="font-orbitron font-bold tracking-wider text-white">MORVEHTV © 2026</span>
         </div>
         <p class="text-xs text-gray-400">Todos los derechos reservados. Creado para YouTube y TikTok.</p>
-        <button onclick="openExportModal()" class="text-xs font-bold text-red-500 hover:underline flex items-center gap-1.5">
-            <i class="fa-solid fa-code"></i> Guía y Código para GitHub Pages
-        </button>
     </footer>
-
-    <!-- Export / GitHub Modal -->
-    <div id="export-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 backdrop-blur-md p-4">
-        <div class="glass-card rounded-3xl max-w-3xl w-full p-6 sm:p-8 border border-red-500/40 relative max-h-[90vh] overflow-y-auto">
-            <button onclick="closeExportModal()" class="absolute top-6 right-6 text-gray-400 hover:text-white text-xl p-2">
-                <i class="fa-solid fa-xmark"></i>
-            </button>
-            <div class="flex items-center gap-3 mb-6">
-                <div class="w-12 h-12 rounded-xl bg-red-500/20 text-red-500 flex items-center justify-center text-xl">
-                    <i class="fa-brands fa-github"></i>
-                </div>
-                <div>
-                    <h3 class="font-orbitron font-bold text-xl text-white">Desplegar en GitHub Pages</h3>
-                    <p class="text-xs text-gray-300">Sigue estos sencillos pasos para actualizar tu web gratis.</p>
-                </div>
-            </div>
-
-            <ol class="space-y-3 text-xs sm:text-sm text-gray-200 mb-6 list-decimal pl-5">
-                <li>Abre tu repositorio en GitHub y edita el archivo <code class="text-red-400 bg-black/40 px-1.5 py-0.5 rounded">index.html</code>.</li>
-                <li>Haz clic en el botón de abajo para copiar todo este código actualizado.</li>
-                <li>Pégalo en tu <code class="text-red-400 bg-black/40 px-1.5 py-0.5 rounded">index.html</code> y guarda los cambios (Commit changes).</li>
-            </ol>
-
-            <div class="flex items-center justify-between gap-4">
-                <button onclick="copyFullCode()" class="flex-1 py-3.5 rounded-xl bg-gradient-to-r from-red-600 to-red-500 text-white font-orbitron font-bold text-xs uppercase tracking-wider hover:opacity-95 shadow-lg glow-youtube transition-all flex items-center justify-center gap-2">
-                    <i class="fa-solid fa-copy"></i> Copiar Código Completo
-                </button>
-                <button onclick="closeExportModal()" class="px-6 py-3.5 rounded-xl glass-card text-gray-200 font-bold text-xs uppercase hover:bg-gray-800 transition-colors">
-                    Cerrar
-                </button>
-            </div>
-        </div>
-    </div>
 
     <!-- JavaScript Interactivo -->
     <script>
@@ -488,26 +449,6 @@
             }, 1000);
         }
         updateCountdown();
-
-        function openExportModal() {
-            document.getElementById('export-modal').classList.remove('hidden');
-            document.getElementById('export-modal').classList.add('flex');
-        }
-
-        function closeExportModal() {
-            document.getElementById('export-modal').classList.add('hidden');
-            document.getElementById('export-modal').classList.remove('flex');
-        }
-
-        function copyFullCode() {
-            const fullHtml = document.documentElement.outerHTML;
-            navigator.clipboard.writeText(fullHtml).then(() => {
-                showToast("¡Código copiado al portapapeles con éxito! Pégalo en tu index.html", "success");
-                closeExportModal();
-            }).catch(err => {
-                showToast("Error al copiar el código.", "error");
-            });
-        }
 
         function handleContactSubmit(event) {
             event.preventDefault();
