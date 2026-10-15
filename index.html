@@ -11,15 +11,6 @@
             darkMode: 'class',
             theme: {
                 extend: {
-                    colors: {
-                        brand: {
-                            youtube: '#ff0000',
-                            youtubeAlt: '#cc0000',
-                            darkBg: '#090d16',
-                            cardBg: '#111827',
-                            cardBorder: '#1f293d',
-                        }
-                    },
                     fontFamily: {
                         sans: ['Inter', 'sans-serif'],
                         orbitron: ['Orbitron', 'sans-serif'],
@@ -77,10 +68,10 @@
 </head>
 <body class="bg-[#090d16] text-gray-100 antialiased selection:bg-red-600 selection:text-white">
 
-    <!-- Toast Notification Container -->
+    <!-- Notificaciones flotantes -->
     <div id="toast-container" class="fixed bottom-6 right-6 z-50 flex flex-col gap-3"></div>
 
-    <!-- Header / Navbar -->
+    <!-- Barra de Navegación -->
     <header class="fixed top-0 left-0 right-0 z-40 glass-card border-b border-gray-800/80">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
             <a href="#" class="flex items-center gap-3 group">
@@ -105,29 +96,26 @@
             </nav>
 
             <div class="flex items-center gap-4">
-                <button onclick="toggleLiveStatus()" id="status-toggle-btn" class="hidden sm:flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 hover:bg-emerald-500/30 transition-all">
+                <button onclick="toggleLiveStatus()" id="status-toggle-btn" class="hidden sm:flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 hover:bg-emerald-500/30 transition-all cursor-pointer">
                     <i class="fa-solid fa-circle text-[8px] animate-pulse"></i> Simulador Estado
                 </button>
-                <button onclick="toggleMobileMenu()" class="md:hidden text-gray-200 hover:text-red-500 text-xl p-2">
+                <button onclick="toggleMobileMenu()" class="md:hidden text-gray-200 hover:text-red-500 text-xl p-2 cursor-pointer">
                     <i class="fa-solid fa-bars" id="mobile-menu-icon"></i>
                 </button>
             </div>
         </div>
 
-        <!-- Mobile Menu -->
+        <!-- Menú Móvil desplegable -->
         <div id="mobile-menu" class="hidden md:hidden glass-card border-t border-gray-800 px-6 py-6 flex flex-col gap-4 text-base font-medium text-gray-200">
             <a href="#inicio" onclick="toggleMobileMenu()" class="hover:text-red-500">Inicio</a>
             <a href="#canales" onclick="toggleMobileMenu()" class="hover:text-red-500">Canales</a>
             <a href="#calendario" onclick="toggleMobileMenu()" class="hover:text-red-500">Horarios</a>
             <a href="#setup" onclick="toggleMobileMenu()" class="hover:text-red-500">Setup</a>
             <a href="#contacto" onclick="toggleMobileMenu()" class="hover:text-red-500">Contacto</a>
-            <button onclick="toggleLiveStatus(); toggleMobileMenu();" class="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 font-bold text-xs uppercase">
-                Cambiar Estado EN VIVO / OFF
-            </button>
         </div>
     </header>
 
-    <!-- Hero Section -->
+    <!-- Sección Hero / Portada -->
     <section id="inicio" class="relative pt-32 pb-20 md:pt-44 md:pb-32 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto flex flex-col items-center text-center">
         <div class="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-red-600/15 rounded-full blur-3xl pointer-events-none"></div>
         <div class="absolute top-1/3 left-1/4 w-72 h-72 bg-purple-600/10 rounded-full blur-3xl pointer-events-none"></div>
@@ -145,23 +133,23 @@
             Streamer, apasionado del SimRacing, creador de contenido y directos épicos en <span class="text-red-500 font-semibold">YouTube</span> y TikTok. ¡Únete a la comunidad!
         </p>
 
-        <!-- CTA Buttons -->
+        <!-- Botones de Acción Directos (Nativos 100% funcionales) -->
         <div class="flex flex-wrap items-center justify-center gap-4 mb-16">
-            <button onclick="openSocialLink('https://www.youtube.com/@morvehtv')" class="flex items-center gap-3 px-8 py-4 rounded-xl bg-gradient-to-r from-red-600 to-red-500 text-white font-orbitron font-bold text-sm tracking-wider uppercase hover:opacity-95 shadow-xl glow-youtube transition-all transform hover:-translate-y-0.5 cursor-pointer">
+            <a href="https://www.youtube.com/@morvehtv" target="_blank" rel="noopener noreferrer" class="flex items-center gap-3 px-8 py-4 rounded-xl bg-gradient-to-r from-red-600 to-red-500 text-white font-orbitron font-bold text-sm tracking-wider uppercase hover:opacity-95 shadow-xl glow-youtube transition-all transform hover:-translate-y-0.5">
                 <i class="fa-brands fa-youtube text-lg"></i> Ver Directo en YouTube
-            </button>
+            </a>
             <a href="#canales" class="flex items-center gap-3 px-8 py-4 rounded-xl glass-card text-gray-100 font-orbitron font-bold text-sm tracking-wider uppercase hover:border-red-500/60 transition-all">
                 <i class="fa-solid fa-share-nodes text-lg text-red-500"></i> Mis Canales
             </a>
         </div>
 
-        <!-- Next Stream Countdown Box -->
+        <!-- Temporizador Próximo Stream -->
         <div class="w-full max-w-xl glass-card rounded-2xl p-6 border border-red-500/20 shadow-2xl">
             <div class="flex items-center justify-between mb-4">
                 <span class="text-xs font-bold uppercase tracking-widest text-red-500 flex items-center gap-2">
                     <i class="fa-regular fa-clock"></i> Próximo Stream en YouTube
                 </span>
-                <span class="text-xs font-medium text-gray-300" id="next-stream-title">SimRacing & Gameplay</span>
+                <span class="text-xs font-medium text-gray-300">SimRacing & Gameplay</span>
             </div>
             <div class="grid grid-cols-4 gap-3 text-center">
                 <div class="bg-black/40 rounded-xl p-3 border border-gray-800">
@@ -184,7 +172,7 @@
         </div>
     </section>
 
-    <!-- Hub de Canales Oficiales -->
+    <!-- Hub de Canales Oficiales (Tarjetas con Enlaces Seguros) -->
     <section id="canales" class="py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
         <div class="text-center mb-16">
             <h2 class="font-orbitron font-black text-3xl sm:text-4xl uppercase mb-4 text-white">
@@ -196,7 +184,7 @@
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-            <!-- YouTube Card (Principal Directos) -->
+            <!-- YouTube Card -->
             <div class="glass-card rounded-2xl p-8 relative overflow-hidden group border-2 border-red-500/40 hover:border-red-500">
                 <div class="absolute -right-8 -top-8 w-32 h-32 bg-red-600/10 rounded-full blur-2xl group-hover:bg-red-600/20 transition-all"></div>
                 <div class="flex items-center justify-between mb-6">
@@ -209,9 +197,9 @@
                 <p class="text-gray-300 text-sm mb-6">Disfruta de las transmisiones en directo, gameplays completos, tutoriales y VODs en alta calidad.</p>
                 <div class="flex items-center justify-between pt-4 border-t border-gray-800">
                     <span class="text-xs font-bold text-gray-300">@morvehtv</span>
-                    <button onclick="openSocialLink('https://www.youtube.com/@morvehtv')" class="px-5 py-2.5 rounded-xl bg-red-600 text-white font-bold text-xs uppercase tracking-wider hover:bg-red-500 transition-colors cursor-pointer">
+                    <a href="https://www.youtube.com/@morvehtv" target="_blank" rel="noopener noreferrer" class="px-5 py-2.5 rounded-xl bg-red-600 text-white font-bold text-xs uppercase tracking-wider hover:bg-red-500 transition-colors">
                         Visitar Canal <i class="fa-solid fa-arrow-right ml-1"></i>
-                    </button>
+                    </a>
                 </div>
             </div>
 
@@ -227,9 +215,9 @@
                 <p class="text-gray-300 text-sm mb-6">Momentos divertidos, fails épicos, clips verticales y clips rápidos sacados de los directos.</p>
                 <div class="flex items-center justify-between pt-4 border-t border-gray-800">
                     <span class="text-xs font-bold text-gray-300">@morvehtv</span>
-                    <button onclick="openSocialLink('https://www.tiktok.com/@morvehtv')" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-pink-600 to-purple-600 text-white font-bold text-xs uppercase tracking-wider hover:opacity-90 transition-colors cursor-pointer">
+                    <a href="https://www.tiktok.com/@morvehtv" target="_blank" rel="noopener noreferrer" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-pink-600 to-purple-600 text-white font-bold text-xs uppercase tracking-wider hover:opacity-90 transition-colors">
                         Seguir <i class="fa-solid fa-arrow-right ml-1"></i>
-                    </button>
+                    </a>
                 </div>
             </div>
         </div>
@@ -247,7 +235,6 @@
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            <!-- Lunes -->
             <div class="glass-card rounded-2xl p-6 border border-gray-800">
                 <div class="flex items-center justify-between mb-4">
                     <span class="font-orbitron font-bold text-lg text-red-500">LUNES</span>
@@ -260,7 +247,6 @@
                 </div>
             </div>
 
-            <!-- Miércoles -->
             <div class="glass-card rounded-2xl p-6 border border-gray-800">
                 <div class="flex items-center justify-between mb-4">
                     <span class="font-orbitron font-bold text-lg text-red-500">MIÉRCOLES</span>
@@ -273,7 +259,6 @@
                 </div>
             </div>
 
-            <!-- Viernes -->
             <div class="glass-card rounded-2xl p-6 border border-gray-800 border-red-500/40">
                 <div class="flex items-center justify-between mb-4">
                     <span class="font-orbitron font-bold text-lg text-red-500">VIERNES</span>
@@ -286,7 +271,6 @@
                 </div>
             </div>
 
-            <!-- Domingo -->
             <div class="glass-card rounded-2xl p-6 border border-gray-800">
                 <div class="flex items-center justify-between mb-4">
                     <span class="font-orbitron font-bold text-lg text-red-500">DOMINGO</span>
@@ -401,13 +385,8 @@
         <p class="text-xs text-gray-400">Todos los derechos reservados. Creado para YouTube y TikTok.</p>
     </footer>
 
-    <!-- JavaScript Interactivo -->
+    <!-- JavaScript Base -->
     <script>
-        // Función de apertura segura para saltar restricciones de apps móviles y navegadores
-        function openSocialLink(url) {
-            window.open(url, '_blank', 'noopener,noreferrer');
-        }
-
         function toggleMobileMenu() {
             const menu = document.getElementById('mobile-menu');
             const icon = document.getElementById('mobile-menu-icon');
