@@ -47,7 +47,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ---------------------------------------------------------
-# 3. Inicialización y Gestión de Base de Datos SQLite
+# 3. Inicialización y Migración Segura de Base de Datos SQLite
 # ---------------------------------------------------------
 def init_db():
     conn = sqlite3.connect("database.db", check_same_thread=False)
@@ -69,7 +69,7 @@ def init_db():
             gasto REAL
         )
     ''')
-    # Finanzas con Categoría
+    # Finanzas (Creamos la tabla si no existe)
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS finanzas (
             username TEXT,
@@ -80,6 +80,13 @@ def init_db():
             fecha TEXT
         )
     ''')
+    
+    # Comprobación de seguridad por si la tabla finanzas antigua no tenía la columna 'categoria'
+    cursor.execute("PRAGMA table_info(finanzas)")
+    columnas = [info[1] for info in cursor.fetchall()]
+    if "categoria" not in columnas:
+        cursor.execute("ALTER TABLE finanzas ADD COLUMN categoria TEXT DEFAULT 'Varios'")
+
     # Lista de la compra
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS compras (
@@ -89,7 +96,7 @@ def init_db():
             comprado INTEGER
         )
     ''')
-    # Diario / Qué he hecho en el día
+    # Diario
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS diario (
             username TEXT,
@@ -199,11 +206,10 @@ seccion = st.sidebar.radio(
 st.sidebar.divider()
 
 # =========================================================
-# SECCIÓN 1: DIARIO / QUÉ HE HECHO HOY
+# SECCIÓN 1: DIARIO
 # =========================================================
 if seccion == "📖 Qué he hecho hoy (Diario)":
     st.title("📖 Registro Diario de Actividades y Eventos")
-    st.write("Anota tus logros, tareas importantes, estado de ánimo y reflexiones del día a día.")
     
     col_d1, col_d2 = st.columns([1, 1])
     
@@ -211,18 +217,18 @@ if seccion == "📖 Qué he hecho hoy (Diario)":
         st.subheader("✍️ Anotación para el día")
         f_diario = st.date_input("Fecha:", datetime.date.today(), key="f_diario")
         animo = st.selectbox("Estado de ánimo:", ["😄 Increíble", "🙂 Normal / Tranquilo", "😴 Cansado", "😤 Estresado", "💪 Motivado"])
-        resumen_texto = st.text_area("¿Qué has hecho hoy? (Metas, reuniones, proyectos, eventos...)", height=180, placeholder="Hoy he avanzado en la web, he ido al gimnasio y he cenado con amigos...")
+        resumen_texto = st.text_area("¿Qué has hecho hoy?", height=180, placeholder="Escribe tus notas del día...")
         
         if st.button("💾 Guardar Diario", type="primary"):
             cursor = conn.cursor()
             cursor.execute("INSERT OR REPLACE INTO diario (username, fecha, animo, resumen) VALUES (?, ?, ?, ?)",
                            (user, str(f_diario), animo, resumen_texto))
             conn.commit()
-            st.success("¡Diario del día guardado correctamente!")
+            st.success("¡Diario guardado correctamente!")
             st.rerun()
 
     with col_d2:
-        st.subheader("📜 Tus Historial de Días")
+        st.subheader("📜 Tus Entradas Anteriores")
         df_diario = pd.read_sql_query("SELECT fecha as Fecha, animo as Ánimo, resumen as Resumen FROM diario WHERE username = ? ORDER BY fecha DESC", conn, params=(user,))
         if not df_diario.empty:
             for _, row in df_diario.iterrows():
@@ -257,8 +263,8 @@ elif seccion == "🚬 Control de Tabaco":
         st.subheader("📊 Estadísticas de Tabaco")
         df_tab = pd.read_sql_query("SELECT fecha as Fecha, cigarros as Cigarros, gasto as 'Gasto (€)' FROM tabaco WHERE username = ? ORDER BY fecha ASC", conn, params=(user,))
         if not df_tab.empty:
-            st.metric("Cigarros Totales Registrados", int(df_tab["Cigarros"].sum()))
-            st.metric("Gasto Total Acumulado", f"{df_tab['Gasto (€)'].sum():.2f} €")
+            st.metric("Cigarros Totales", int(df_tab["Cigarros"].sum()))
+            st.metric("Gasto Total", f"{df_tab['Gasto (€)'].sum():.2f} €")
             st.bar_chart(df_tab.set_index("Fecha")["Cigarros"])
         else:
             st.info("Sin datos registrados aún.")
@@ -272,7 +278,7 @@ elif seccion == "💶 Dinero Personal":
     d1, d2 = st.columns(2)
     with d1:
         st.subheader("➕ Añadir Movimiento")
-        concepto = st.text_input("Concepto (Ej: Compra semanal, Gasolina):")
+        concepto = st.text_input("Concepto (Ej: Compra semanal):")
         categoria = st.selectbox("Categoría:", ["🛒 Alimentación", "🏡 Hogar", "🚗 Transporte", "🎉 Ocio", "💼 Nómina", "💸 Varios"])
         tipo = st.selectbox("Tipo:", ["Gasto", "Ingreso"])
         cantidad = st.number_input("Cantidad (€):", min_value=0.0, value=20.0)
@@ -303,11 +309,10 @@ elif seccion == "💶 Dinero Personal":
 # =========================================================
 elif seccion == "🛒 Lista de la Compra":
     st.title("🛒 Lista de la Compra Interactiva")
-    st.write("Añade productos pendientes y márcalos directamente cuando estés en el supermercado.")
     
     col_add, col_btn = st.columns([4, 1])
     with col_add:
-        nuevo_item = st.text_input("Añadir producto:", label_visibility="collapsed", placeholder="Ej: Leche, Huevos, Manzanas...")
+        nuevo_item = st.text_input("Añadir producto:", label_visibility="collapsed", placeholder="Ej: Leche, Huevos, Café...")
     with col_btn:
         if st.button("➕ Añadir", type="primary") and nuevo_item:
             cursor = conn.cursor()
@@ -317,7 +322,6 @@ elif seccion == "🛒 Lista de la Compra":
 
     st.divider()
     
-    # Listar items de la base de datos
     df_compras = pd.read_sql_query("SELECT id, item, comprado FROM compras WHERE username = ?", conn, params=(user,))
     
     if not df_compras.empty:
@@ -341,7 +345,7 @@ elif seccion == "🛒 Lista de la Compra":
                     conn.commit()
                     st.rerun()
     else:
-        st.info("La lista de la compra está vacía. ¡Añade productos arriba!")
+        st.info("La lista de la compra está vacía.")
 
 # =========================================================
 # SECCIÓN 5: DEPORTE
@@ -353,7 +357,7 @@ elif seccion == "🏃 Deporte y Salud":
     with s1:
         st.subheader("➕ Añadir Entreno")
         f_dep = st.date_input("Fecha:", datetime.date.today(), key="fd")
-        act = st.text_input("Actividad (Ej: Gimnasio, Bici, Running):")
+        act = st.text_input("Actividad (Ej: Gimnasio, Bici):")
         cal = st.number_input("Calorías (kcal):", min_value=0, value=300)
         
         if st.button("Guardar Entrenamiento", type="primary"):
