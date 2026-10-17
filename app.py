@@ -15,16 +15,14 @@ st.set_page_config(
 )
 
 # ---------------------------------------------------------
-# 2. Estilos CSS: Fondo llamativo (Gradiente y Neón / Glassmorphism)
+# 2. Estilos CSS: Fondo Neón & Glassmorphism Mejorado
 # ---------------------------------------------------------
 st.markdown("""
     <style>
-        /* Fondo general con degradado llamativo */
         .stApp {
-            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #31103f 100%);
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 40%, #31103f 100%);
             color: #f8fafc;
         }
-        /* Tarjetas estilo Glassmorphism */
         .metric-card {
             background: rgba(30, 41, 59, 0.7);
             backdrop-filter: blur(12px);
@@ -33,7 +31,6 @@ st.markdown("""
             border-radius: 16px;
             box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
         }
-        /* Botones personalizados */
         .stButton>button {
             border-radius: 12px;
             font-weight: 700;
@@ -50,19 +47,20 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ---------------------------------------------------------
-# 3. Base de Datos SQLite (Usuarios y Datos Persistentes)
+# 3. Inicialización y Gestión de Base de Datos SQLite
 # ---------------------------------------------------------
 def init_db():
     conn = sqlite3.connect("database.db", check_same_thread=False)
     cursor = conn.cursor()
-    # Tabla de usuarios
+    
+    # Usuarios
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS users (
             username TEXT PRIMARY KEY,
             password TEXT
         )
     ''')
-    # Tabla de tabaco
+    # Tabaco
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS tabaco (
             username TEXT,
@@ -71,17 +69,37 @@ def init_db():
             gasto REAL
         )
     ''')
-    # Tabla de finanzas
+    # Finanzas con Categoría
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS finanzas (
             username TEXT,
             concepto TEXT,
+            categoria TEXT,
             tipo TEXT,
             cantidad REAL,
             fecha TEXT
         )
     ''')
-    # Tabla de deporte
+    # Lista de la compra
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS compras (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            username TEXT,
+            item TEXT,
+            comprado INTEGER
+        )
+    ''')
+    # Diario / Qué he hecho en el día
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS diario (
+            username TEXT,
+            fecha TEXT,
+            animo TEXT,
+            resumen TEXT,
+            PRIMARY KEY (username, fecha)
+        )
+    ''')
+    # Deporte
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS deporte (
             username TEXT,
@@ -121,7 +139,7 @@ def verificar_usuario(username, password):
     return False
 
 # ---------------------------------------------------------
-# 4. Sistema de Autenticación (Login / Registro)
+# 4. Sistema de Autenticación
 # ---------------------------------------------------------
 if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
@@ -129,7 +147,7 @@ if "logged_in" not in st.session_state:
 
 if not st.session_state.logged_in:
     st.markdown("<h1 style='text-align: center; color: #a855f7;'>🚀 Panel Personal Pro</h1>", unsafe_allow_html=True)
-    st.markdown("<p style='text-align: center; color: #94a3b8;'>Inicia sesión o regístrate para acceder a tus datos seguros.</p>", unsafe_allow_html=True)
+    st.markdown("<p style='text-align: center; color: #94a3b8;'>Inicia sesión o regístrate para acceder a tu diario, finanzas y hábitos.</p>", unsafe_allow_html=True)
     
     col_l1, col_l2, col_l3 = st.columns([1, 2, 1])
     with col_l2:
@@ -142,7 +160,7 @@ if not st.session_state.logged_in:
                 if verificar_usuario(l_user, l_pass):
                     st.session_state.logged_in = True
                     st.session_state.username = l_user
-                    st.success("¡Bienvenido de nuevo!")
+                    st.success("¡Bienvenido!")
                     st.rerun()
                 else:
                     st.error("Usuario o contraseña incorrectos.")
@@ -153,7 +171,7 @@ if not st.session_state.logged_in:
             if st.button("Crear Cuenta", use_container_width=True):
                 if r_user and r_pass:
                     if registrar_usuario(r_user, r_pass):
-                        st.success("¡Cuenta creada con éxito! Ya puedes iniciar sesión.")
+                        st.success("¡Cuenta creada! Ya puedes iniciar sesión.")
                     else:
                         st.error("El usuario ya existe.")
                 else:
@@ -161,9 +179,10 @@ if not st.session_state.logged_in:
     st.stop()
 
 # ---------------------------------------------------------
-# 5. Dashboard Principal (Usuario Autenticado)
+# 5. Panel Principal (Usuario Conectado)
 # ---------------------------------------------------------
 user = st.session_state.username
+conn = sqlite3.connect("database.db", check_same_thread=False)
 
 st.sidebar.title(f"👤 Hola, {user}")
 if st.sidebar.button("🚪 Cerrar Sesión"):
@@ -174,103 +193,182 @@ if st.sidebar.button("🚪 Cerrar Sesión"):
 st.sidebar.divider()
 seccion = st.sidebar.radio(
     "Menú de Navegación",
-    ["🚬 Control de Tabaco", "💶 Dinero Personal", "🏃 Deporte y Salud"]
+    ["📖 Qué he hecho hoy (Diario)", "🚬 Control de Tabaco", "💶 Dinero Personal", "🛒 Lista de la Compra", "🏃 Deporte y Salud"]
 )
 
-# Conexión activa para consultas de usuario
-conn = sqlite3.connect("database.db", check_same_thread=False)
+st.sidebar.divider()
 
 # =========================================================
-# SECCIÓN 1: TABACO
+# SECCIÓN 1: DIARIO / QUÉ HE HECHO HOY
 # =========================================================
-if seccion == "🚬 Control de Tabaco":
-    st.title("🚬 Control de Tabaco en Tiempo Real")
+if seccion == "📖 Qué he hecho hoy (Diario)":
+    st.title("📖 Registro Diario de Actividades y Eventos")
+    st.write("Anota tus logros, tareas importantes, estado de ánimo y reflexiones del día a día.")
+    
+    col_d1, col_d2 = st.columns([1, 1])
+    
+    with col_d1:
+        st.subheader("✍️ Anotación para el día")
+        f_diario = st.date_input("Fecha:", datetime.date.today(), key="f_diario")
+        animo = st.selectbox("Estado de ánimo:", ["😄 Increíble", "🙂 Normal / Tranquilo", "😴 Cansado", "😤 Estresado", "💪 Motivado"])
+        resumen_texto = st.text_area("¿Qué has hecho hoy? (Metas, reuniones, proyectos, eventos...)", height=180, placeholder="Hoy he avanzado en la web, he ido al gimnasio y he cenado con amigos...")
+        
+        if st.button("💾 Guardar Diario", type="primary"):
+            cursor = conn.cursor()
+            cursor.execute("INSERT OR REPLACE INTO diario (username, fecha, animo, resumen) VALUES (?, ?, ?, ?)",
+                           (user, str(f_diario), animo, resumen_texto))
+            conn.commit()
+            st.success("¡Diario del día guardado correctamente!")
+            st.rerun()
+
+    with col_d2:
+        st.subheader("📜 Tus Historial de Días")
+        df_diario = pd.read_sql_query("SELECT fecha as Fecha, animo as Ánimo, resumen as Resumen FROM diario WHERE username = ? ORDER BY fecha DESC", conn, params=(user,))
+        if not df_diario.empty:
+            for _, row in df_diario.iterrows():
+                with st.expander(f"📅 {row['Fecha']} — {row['Ánimo']}"):
+                    st.write(row['Resumen'])
+        else:
+            st.info("Aún no has añadido entradas a tu diario.")
+
+# =========================================================
+# SECCIÓN 2: TABACO
+# =========================================================
+elif seccion == "🚬 Control de Tabaco":
+    st.title("🚬 Control de Tabaco y Progreso")
     
     c1, c2 = st.columns(2)
     with c1:
         st.subheader("➕ Registrar Consumo")
-        f_tab = st.date_input("Fecha:", datetime.date.today())
+        f_tab = st.date_input("Fecha:", datetime.date.today(), key="f_tab")
         n_cig = st.number_input("Cigarros fumados:", min_value=0, value=5)
         p_caj = st.number_input("Precio cajetilla (20 uds):", value=5.0)
         gasto = round((n_cig / 20.0) * p_caj, 2)
         
-        if st.button("Guardar en vivo", type="primary"):
+        if st.button("Guardar Consumo", type="primary"):
             cursor = conn.cursor()
             cursor.execute("DELETE FROM tabaco WHERE username = ? AND fecha = ?", (user, str(f_tab)))
             cursor.execute("INSERT INTO tabaco (username, fecha, cigarros, gasto) VALUES (?, ?, ?, ?)", (user, str(f_tab), n_cig, gasto))
             conn.commit()
-            st.success("¡Actualizado al instante!")
+            st.success("¡Registro actualizado!")
             st.rerun()
 
     with c2:
-        st.subheader("📊 Tus Estadísticas")
-        df_tab = pd.read_sql_query("SELECT fecha as Fecha, cigarros as Cigarros, gasto as 'Gasto (€)' FROM tabaco WHERE username = ?", conn, params=(user,))
+        st.subheader("📊 Estadísticas de Tabaco")
+        df_tab = pd.read_sql_query("SELECT fecha as Fecha, cigarros as Cigarros, gasto as 'Gasto (€)' FROM tabaco WHERE username = ? ORDER BY fecha ASC", conn, params=(user,))
         if not df_tab.empty:
-            st.metric("Total Cigarros", int(df_tab["Cigarros"].sum()))
-            st.metric("Gasto Total", f"{df_tab['Gasto (€)'].sum():.2f} €")
+            st.metric("Cigarros Totales Registrados", int(df_tab["Cigarros"].sum()))
+            st.metric("Gasto Total Acumulado", f"{df_tab['Gasto (€)'].sum():.2f} €")
             st.bar_chart(df_tab.set_index("Fecha")["Cigarros"])
         else:
-            st.info("No hay registros todavía.")
+            st.info("Sin datos registrados aún.")
 
 # =========================================================
-# SECCIÓN 2: DINERO PERSONAL
+# SECCIÓN 3: DINERO PERSONAL
 # =========================================================
 elif seccion == "💶 Dinero Personal":
-    st.title("💶 Control Financiero en Tiempo Real")
+    st.title("💶 Control Financiero")
     
     d1, d2 = st.columns(2)
     with d1:
         st.subheader("➕ Añadir Movimiento")
-        concepto = st.text_input("Concepto:")
+        concepto = st.text_input("Concepto (Ej: Compra semanal, Gasolina):")
+        categoria = st.selectbox("Categoría:", ["🛒 Alimentación", "🏡 Hogar", "🚗 Transporte", "🎉 Ocio", "💼 Nómina", "💸 Varios"])
         tipo = st.selectbox("Tipo:", ["Gasto", "Ingreso"])
         cantidad = st.number_input("Cantidad (€):", min_value=0.0, value=20.0)
         
-        if st.button("Añadir Movimiento", type="primary"):
+        if st.button("Registrar Movimiento", type="primary"):
             cursor = conn.cursor()
-            cursor.execute("INSERT INTO finanzas (username, concepto, tipo, cantidad, fecha) VALUES (?, ?, ?, ?, ?)", 
-                           (user, concepto, tipo, cantidad, str(datetime.date.today())))
+            cursor.execute("INSERT INTO finanzas (username, concepto, categoria, tipo, cantidad, fecha) VALUES (?, ?, ?, ?, ?, ?)", 
+                           (user, concepto, categoria, tipo, cantidad, str(datetime.date.today())))
             conn.commit()
-            st.success("¡Movimiento registrado al instante!")
+            st.success("¡Movimiento registrado!")
             st.rerun()
 
     with d2:
-        st.subheader("⚖️ Balance")
-        df_fin = pd.read_sql_query("SELECT concepto as Concepto, tipo as Tipo, cantidad as 'Cantidad (€)', fecha as Fecha FROM finanzas WHERE username = ?", conn, params=(user,))
+        st.subheader("⚖️ Estado Financiero")
+        df_fin = pd.read_sql_query("SELECT concepto as Concepto, categoria as Categoría, tipo as Tipo, cantidad as 'Cantidad (€)', fecha as Fecha FROM finanzas WHERE username = ?", conn, params=(user,))
         if not df_fin.empty:
             ingresos = df_fin[df_fin["Tipo"] == "Ingreso"]["Cantidad (€)"].sum()
             gastos = df_fin[df_fin["Tipo"] == "Gasto"]["Cantidad (€)"].sum()
             balance = ingresos - gastos
-            st.metric("Balance Neto", f"{balance:.2f} €")
+            
+            st.metric("Balance Neto", f"{balance:.2f} €", delta=f"{balance:.2f} €")
             st.dataframe(df_fin, use_container_width=True)
         else:
-            st.info("Aún no hay movimientos registrados.")
+            st.info("Sin movimientos guardados.")
 
 # =========================================================
-# SECCIÓN 3: DEPORTE Y SALUD
+# SECCIÓN 4: LISTA DE LA COMPRA
+# =========================================================
+elif seccion == "🛒 Lista de la Compra":
+    st.title("🛒 Lista de la Compra Interactiva")
+    st.write("Añade productos pendientes y márcalos directamente cuando estés en el supermercado.")
+    
+    col_add, col_btn = st.columns([4, 1])
+    with col_add:
+        nuevo_item = st.text_input("Añadir producto:", label_visibility="collapsed", placeholder="Ej: Leche, Huevos, Manzanas...")
+    with col_btn:
+        if st.button("➕ Añadir", type="primary") and nuevo_item:
+            cursor = conn.cursor()
+            cursor.execute("INSERT INTO compras (username, item, comprado) VALUES (?, ?, 0)", (user, nuevo_item))
+            conn.commit()
+            st.rerun()
+
+    st.divider()
+    
+    # Listar items de la base de datos
+    df_compras = pd.read_sql_query("SELECT id, item, comprado FROM compras WHERE username = ?", conn, params=(user,))
+    
+    if not df_compras.empty:
+        for _, row in df_compras.iterrows():
+            item_id = row['id']
+            item_text = row['item']
+            is_bought = bool(row['comprado'])
+            
+            c_check, c_del = st.columns([5, 1])
+            with c_check:
+                checked = st.checkbox(item_text, value=is_bought, key=f"compra_{item_id}")
+                if checked != is_bought:
+                    cursor = conn.cursor()
+                    cursor.execute("UPDATE compras SET comprado = ? WHERE id = ?", (1 if checked else 0, item_id))
+                    conn.commit()
+                    st.rerun()
+            with c_del:
+                if st.button("🗑️", key=f"del_{item_id}"):
+                    cursor = conn.cursor()
+                    cursor.execute("DELETE FROM compras WHERE id = ?", (item_id,))
+                    conn.commit()
+                    st.rerun()
+    else:
+        st.info("La lista de la compra está vacía. ¡Añade productos arriba!")
+
+# =========================================================
+# SECCIÓN 5: DEPORTE
 # =========================================================
 elif seccion == "🏃 Deporte y Salud":
-    st.title("🏃 Registro de Actividad Física")
+    st.title("🏃 Registro de Entrenamientos")
     
     s1, s2 = st.columns(2)
     with s1:
-        st.subheader("➕ Añadir Actividad")
+        st.subheader("➕ Añadir Entreno")
         f_dep = st.date_input("Fecha:", datetime.date.today(), key="fd")
-        act = st.text_input("Actividad (Ej: Gimnasio, Running):")
+        act = st.text_input("Actividad (Ej: Gimnasio, Bici, Running):")
         cal = st.number_input("Calorías (kcal):", min_value=0, value=300)
         
-        if st.button("Guardar Actividad", type="primary"):
+        if st.button("Guardar Entrenamiento", type="primary"):
             cursor = conn.cursor()
             cursor.execute("INSERT INTO deporte (username, fecha, actividad, calorias) VALUES (?, ?, ?, ?)", (user, str(f_dep), act, cal))
             conn.commit()
-            st.success("¡Entreno guardado!")
+            st.success("¡Entrenamiento registrado!")
             st.rerun()
 
     with s2:
-        st.subheader("📜 Tus Entrenamientos")
-        df_dep = pd.read_sql_query("SELECT fecha as Fecha, actividad as Actividad, calorias as Calorías FROM deporte WHERE username = ?", conn, params=(user,))
+        st.subheader("📋 Tu Historial Deportivo")
+        df_dep = pd.read_sql_query("SELECT fecha as Fecha, actividad as Actividad, calorias as 'Calorías (kcal)' FROM deporte WHERE username = ?", conn, params=(user,))
         if not df_dep.empty:
             st.dataframe(df_dep, use_container_width=True)
         else:
-            st.info("Sin registros de deporte todavía.")
+            st.info("Sin entrenamientos registrados.")
 
 conn.close()
