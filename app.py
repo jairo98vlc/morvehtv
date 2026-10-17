@@ -27,14 +27,12 @@ st.markdown("""
     <link rel="apple-touch-icon" href="https://img.icons8.com/isometric/512/dashboard.png">
     
     <style>
-        /* Fondo Principal con Gradiente Profundo */
         .stApp {
             background: radial-gradient(circle at top right, #1e1b4b 0%, #0f172a 40%, #090d16 100%);
             color: #f8fafc;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         }
 
-        /* Ajuste de Márgenes del Contenedor Principal */
         .main .block-container {
             padding-left: 0.85rem !important;
             padding-right: 0.85rem !important;
@@ -45,7 +43,6 @@ st.markdown("""
 
         #MainMenu, footer, header { visibility: hidden; }
 
-        /* Tarjetas Neón Glassmorphism */
         .glass-card {
             background: rgba(30, 41, 59, 0.55);
             backdrop-filter: blur(20px);
@@ -57,7 +54,6 @@ st.markdown("""
             margin-bottom: 14px;
         }
 
-        /* Botones Principales con Gradiente Neón */
         .stButton>button {
             border-radius: 14px !important;
             font-weight: 700 !important;
@@ -78,7 +74,6 @@ st.markdown("""
             box-shadow: 0 2px 10px rgba(168, 85, 247, 0.2) !important;
         }
 
-        /* Entradas de Texto y Selectores */
         .stTextInput>div>div>input, .stNumberInput>div>div>input, .stSelectbox>div>div>div, .stDateInput>div>div>input, .stTextArea>div>div>textarea {
             border-radius: 14px !important;
             min-height: 46px !important;
@@ -88,7 +83,6 @@ st.markdown("""
             backdrop-filter: blur(10px);
         }
 
-        /* Navegación por Pestañas Estilizada */
         .stTabs [data-baseweb="tab-list"] {
             gap: 6px;
             background-color: rgba(15, 23, 42, 0.65);
@@ -115,7 +109,6 @@ st.markdown("""
             box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
         }
 
-        /* Modificaciones en métricas */
         [data-testid="stMetricValue"] {
             font-size: 1.6rem !important;
             font-weight: 800 !important;
@@ -131,7 +124,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ---------------------------------------------------------
-# 3. Base de Datos SQLite y Esquema Persistente
+# 3. Base de Datos SQLite e Inicialización
 # ---------------------------------------------------------
 def init_db():
     conn = sqlite3.connect("database.db", check_same_thread=False)
@@ -191,7 +184,7 @@ if "logged_in" not in st.session_state:
 
 if not st.session_state.logged_in:
     st.markdown("<h2 style='text-align: center; color: #a855f7; margin-top: 1.5rem;'>⚡ Life Dashboard Pro</h2>", unsafe_allow_html=True)
-    st.markdown("<p style='text-align: center; color: #94a3b8; font-size: 0.9rem;'>Gestión personal inteligente, privada y multiusuario.</p>", unsafe_allow_html=True)
+    st.markdown("<p style='text-align: center; color: #94a3b8; font-size: 0.9rem;'>Gestión personal independiente, privada y segura.</p>", unsafe_allow_html=True)
     
     tab_log, tab_reg = st.tabs(["🔑 Acceder", "📝 Crear Cuenta"])
     
@@ -202,7 +195,7 @@ if not st.session_state.logged_in:
             if verificar_usuario(l_user, l_pass):
                 st.session_state.logged_in = True
                 st.session_state.username = l_user
-                st.success("¡Bienvenido!")
+                st.success("¡Bienvenido a tu perfil privado!")
                 st.rerun()
             else:
                 st.error("Credenciales incorrectas.")
@@ -213,23 +206,23 @@ if not st.session_state.logged_in:
         if st.button("Registrarse", use_container_width=True):
             if r_user and r_pass:
                 if registrar_usuario(r_user, r_pass):
-                    st.success("¡Cuenta registrada con éxito!")
+                    st.success("¡Cuenta privada creada con éxito! Ya puedes iniciar sesión.")
                 else:
-                    st.error("El usuario ya existe.")
+                    st.error("El nombre de usuario ya está en uso.")
             else:
                 st.warning("Completa todos los campos.")
     st.stop()
 
 # ---------------------------------------------------------
-# 5. Dashboard Principal
+# 5. Dashboard Principal (Aislamiento Estricto por Usuario)
 # ---------------------------------------------------------
 user = st.session_state.username
 conn = sqlite3.connect("database.db", check_same_thread=False)
 
-# Cabecera
+# Cabecera Privada
 col_h1, col_h2 = st.columns([3, 1])
 with col_h1:
-    st.markdown(f"👤 **{user}** · *Life Control*")
+    st.markdown(f"👤 **Perfil Privado:** `{user}`")
 with col_h2:
     if st.button("🚪 Salir", use_container_width=True):
         st.session_state.logged_in = False
@@ -242,10 +235,10 @@ tab_resumen, tab_diario, tab_habitos, tab_tabaco, tab_finanzas, tab_compras, tab
 ])
 
 # =========================================================
-# SECCIÓN 1: RESUMEN EJECUTIVO
+# SECCIÓN 1: RESUMEN EJECUTIVO PRIVADO
 # =========================================================
 with tab_resumen:
-    st.markdown("### 📊 Visión General del Mes")
+    st.markdown("### 📊 Visión General de tu Perfil")
     
     df_fin = pd.read_sql_query("SELECT tipo, cantidad FROM finanzas WHERE username = ?", conn, params=(user,))
     df_tab = pd.read_sql_query("SELECT cigarros, gasto FROM tabaco WHERE username = ?", conn, params=(user,))
@@ -270,14 +263,14 @@ with tab_resumen:
         st.metric("🎯 Metas Cumplidas", f"{metas_ok} metas")
 
     st.divider()
-    st.markdown("#### 📥 Copias de Seguridad")
-    if st.button("Descargar Resumen Financiero (CSV)"):
+    st.markdown("#### 📥 Copias de Seguridad Privadas")
+    if st.button("Descargar Mis Finanzas (CSV)"):
         df_fin_all = pd.read_sql_query("SELECT * FROM finanzas WHERE username = ?", conn, params=(user,))
         csv_data = df_fin_all.to_csv(index=False).encode('utf-8')
-        st.download_button("💾 Confirmar Descarga CSV", csv_data, "finanzas_backup.csv", "text/csv")
+        st.download_button("💾 Confirmar Descarga CSV", csv_data, f"finanzas_{user}.csv", "text/csv")
 
 # =========================================================
-# SECCIÓN 2: DIARIO
+# SECCIÓN 2: DIARIO PRIVADO
 # =========================================================
 with tab_diario:
     st.markdown("### 📖 Diario Personal")
@@ -290,7 +283,7 @@ with tab_diario:
         cursor.execute("INSERT OR REPLACE INTO diario (username, fecha, animo, resumen) VALUES (?, ?, ?, ?)",
                        (user, str(f_diario), animo, resumen_texto))
         conn.commit()
-        st.success("¡Entrada guardada!")
+        st.success("¡Entrada privada guardada!")
         st.rerun()
 
     st.divider()
@@ -300,10 +293,10 @@ with tab_diario:
             with st.expander(f"📅 {row['Fecha']} — {row['Ánimo']}"):
                 st.write(row['Resumen'])
     else:
-        st.info("Aún no tienes notas guardadas en tu diario.")
+        st.info("Aún no tienes notas guardadas en tu diario privado.")
 
 # =========================================================
-# SECCIÓN 3: RUTINAS Y HÁBITOS
+# SECCIÓN 3: RUTINAS Y HÁBITOS PRIVADOS
 # =========================================================
 with tab_habitos:
     st.markdown("### ⚡ Hábitos y Rutinas Diarias")
@@ -340,10 +333,10 @@ with tab_habitos:
                     conn.commit()
                     st.rerun()
     else:
-        st.info("Sin hábitos activos para el día de hoy.")
+        st.info("Sin hábitos activos para hoy.")
 
 # =========================================================
-# SECCIÓN 4: TABACO
+# SECCIÓN 4: TABACO PRIVADO
 # =========================================================
 with tab_tabaco:
     st.markdown("### 🚬 Control de Tabaco")
@@ -368,7 +361,7 @@ with tab_tabaco:
         st.info("No hay consumo registrado.")
 
 # =========================================================
-# SECCIÓN 5: FINANZAS
+# SECCIÓN 5: FINANZAS PRIVADAS
 # =========================================================
 with tab_finanzas:
     st.markdown("### 💶 Dinero Personal")
@@ -393,7 +386,7 @@ with tab_finanzas:
         st.info("Aún no tienes movimientos registrados.")
 
 # =========================================================
-# SECCIÓN 6: COMPRAS
+# SECCIÓN 6: COMPRAS PRIVADAS
 # =========================================================
 with tab_compras:
     st.markdown("### 🛒 Lista de la Compra")
@@ -428,10 +421,10 @@ with tab_compras:
                     conn.commit()
                     st.rerun()
     else:
-        st.info("La lista de la compra está vacía.")
+        st.info("Tu lista de la compra está vacía.")
 
 # =========================================================
-# SECCIÓN 7: DEPORTE
+# SECCIÓN 7: DEPORTE PRIVADO
 # =========================================================
 with tab_deporte:
     st.markdown("### 🏃 Registro de Entrenamientos")
@@ -454,7 +447,7 @@ with tab_deporte:
         st.info("Sin registros de entrenamiento.")
 
 # =========================================================
-# SECCIÓN 8: METAS
+# SECCIÓN 8: METAS PRIVADAS
 # =========================================================
 with tab_metas:
     st.markdown("### 🎯 Metas y Objetivos")
