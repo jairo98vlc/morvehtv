@@ -235,7 +235,7 @@ tab_resumen, tab_diario, tab_habitos, tab_tabaco, tab_finanzas, tab_compras, tab
 ])
 
 # =========================================================
-# SECCIÓN 1: RESUMEN EJECUTIVO PRIVADO
+# SECCIÓN 1: RESUMEN EJECUTIVO
 # =========================================================
 with tab_resumen:
     st.markdown("### 📊 Visión General de tu Perfil")
@@ -270,38 +270,51 @@ with tab_resumen:
         st.download_button("💾 Confirmar Descarga CSV", csv_data, f"finanzas_{user}.csv", "text/csv")
 
 # =========================================================
-# SECCIÓN 2: DIARIO PRIVADO
+# SECCIÓN 2: DIARIO PERSONAL MEJORADO
 # =========================================================
 with tab_diario:
     st.markdown("### 📖 Diario Personal")
-    f_diario = st.date_input("Fecha:", datetime.date.today(), key="f_diario")
-    animo = st.selectbox("Estado de ánimo:", ["😄 Increíble", "🙂 Tranquilo", "😴 Cansado", "😤 Estresado", "💪 Motivado"])
-    resumen_texto = st.text_area("¿Qué ha ocurrido hoy?", placeholder="Anota tus pensamientos o logros del día...", height=120)
     
-    if st.button("💾 Guardar Entrada", use_container_width=True):
-        cursor = conn.cursor()
-        cursor.execute("INSERT OR REPLACE INTO diario (username, fecha, animo, resumen) VALUES (?, ?, ?, ?)",
-                       (user, str(f_diario), animo, resumen_texto))
-        conn.commit()
-        st.success("¡Entrada privada guardada!")
-        st.rerun()
+    with st.expander("✍️ Escribir nueva entrada", expanded=True):
+        f_diario = st.date_input("Fecha:", datetime.date.today(), key="f_diario")
+        animo = st.selectbox("Estado de ánimo:", ["😄 Increíble", "🙂 Tranquilo", "😴 Cansado", "😤 Estresado", "💪 Motivado"])
+        resumen_texto = st.text_area("¿Qué ha ocurrido hoy?", placeholder="Anota tus pensamientos, lecciones o logros del día...", height=120)
+        
+        if st.button("💾 Guardar Entrada de Diario", use_container_width=True):
+            if resumen_texto.strip():
+                cursor = conn.cursor()
+                cursor.execute("INSERT OR REPLACE INTO diario (username, fecha, animo, resumen) VALUES (?, ?, ?, ?)",
+                               (user, str(f_diario), animo, resumen_texto))
+                conn.commit()
+                st.success("¡Entrada guardada con éxito!")
+                st.rerun()
+            else:
+                st.warning("El texto del diario no puede estar vacío.")
 
     st.divider()
+    st.markdown("#### 📚 Historial de Entradas")
     df_diario = pd.read_sql_query("SELECT fecha as Fecha, animo as Ánimo, resumen as Resumen FROM diario WHERE username = ? ORDER BY fecha DESC", conn, params=(user,))
     if not df_diario.empty:
         for _, row in df_diario.iterrows():
             with st.expander(f"📅 {row['Fecha']} — {row['Ánimo']}"):
                 st.write(row['Resumen'])
     else:
-        st.info("Aún no tienes notas guardadas en tu diario privado.")
+        st.info("Aún no tienes notas guardadas en tu diario.")
 
 # =========================================================
-# SECCIÓN 3: RUTINAS Y HÁBITOS PRIVADOS
+# SECCIÓN 3: RUTINAS Y HÁBITOS MEJORADO
 # =========================================================
 with tab_habitos:
     st.markdown("### ⚡ Hábitos y Rutinas Diarias")
-    nuevo_habito = st.text_input("Añadir hábito recurrente:", placeholder="Ej: Meditar 10m, Estudiar, Leer...")
-    if st.button("➕ Añadir Hábito", use_container_width=True) and nuevo_habito:
+    
+    col_hab1, col_hab2 = st.columns([3, 1])
+    with col_hab1:
+        nuevo_habito = st.text_input("Nuevo hábito recurrente:", placeholder="Ej: Meditar 10m, Estudiar, Leer...")
+    with col_hab2:
+        st.markdown("<div style='height: 28px;'></div>", unsafe_allow_html=True)
+        btn_add_hab = st.button("➕ Añadir", use_container_width=True)
+        
+    if btn_add_hab and nuevo_habito:
         cursor = conn.cursor()
         cursor.execute("INSERT INTO habitos (username, habito, completado, fecha) VALUES (?, ?, 0, ?)", 
                        (user, nuevo_habito, str(datetime.date.today())))
@@ -309,7 +322,7 @@ with tab_habitos:
         st.rerun()
 
     st.divider()
-    st.markdown(f"#### 📅 Hoy: {datetime.date.today().strftime('%d/%m/%Y')}")
+    st.markdown(f"#### 📅 Check-in de Hoy: {datetime.date.today().strftime('%d/%m/%Y')}")
     df_hab = pd.read_sql_query("SELECT id, habito, completado FROM habitos WHERE username = ? AND fecha = ?", conn, params=(user, str(datetime.date.today())))
     
     if not df_hab.empty:
@@ -333,67 +346,97 @@ with tab_habitos:
                     conn.commit()
                     st.rerun()
     else:
-        st.info("Sin hábitos activos para hoy.")
+        st.info("No hay hábitos configurados para hoy. ¡Añade uno arriba!")
 
 # =========================================================
-# SECCIÓN 4: TABACO PRIVADO
+# SECCIÓN 4: CONTROL DE TABACO MEJORADO (CON GRÁFICO)
 # =========================================================
 with tab_tabaco:
-    st.markdown("### 🚬 Control de Tabaco")
-    f_tab = st.date_input("Fecha:", datetime.date.today(), key="f_tab")
-    n_cig = st.number_input("Cigarros fumados:", min_value=0, value=5)
-    p_caj = st.number_input("Precio cajetilla (20 uds):", value=5.0)
-    gasto = round((n_cig / 20.0) * p_caj, 2)
+    st.markdown("### 🚬 Control de Tabaco y Progreso")
     
-    if st.button("Guardar Consumo", use_container_width=True):
+    col_t1, col_t2 = st.columns(2)
+    with col_t1:
+        f_tab = st.date_input("Fecha:", datetime.date.today(), key="f_tab")
+        n_cig = st.number_input("Cigarros fumados:", min_value=0, value=5)
+    with col_t2:
+        p_caj = st.number_input("Precio cajetilla (20 uds):", value=5.0)
+        gasto = round((n_cig / 20.0) * p_caj, 2)
+        st.markdown(f"<br><b>Gasto calculado del día:</b> <span style='color: #a855f7; font-size: 1.2rem;'>{gasto:.2f} €</span>", unsafe_allow_html=True)
+    
+    if st.button("💾 Guardar Consumo de Tabaco", use_container_width=True):
         cursor = conn.cursor()
         cursor.execute("DELETE FROM tabaco WHERE username = ? AND fecha = ?", (user, str(f_tab)))
         cursor.execute("INSERT INTO tabaco (username, fecha, cigarros, gasto) VALUES (?, ?, ?, ?)", (user, str(f_tab), n_cig, gasto))
         conn.commit()
-        st.success("¡Registro de tabaco guardado!")
+        st.success("¡Registro actualizado correctamente!")
         st.rerun()
 
     st.divider()
+    st.markdown("#### 📊 Evolución Gráfica del Consumo")
     df_tab = pd.read_sql_query("SELECT fecha as Fecha, cigarros as Cigarros, gasto as 'Gasto (€)' FROM tabaco WHERE username = ? ORDER BY fecha ASC", conn, params=(user,))
     if not df_tab.empty:
         st.bar_chart(df_tab.set_index("Fecha")["Cigarros"])
+        st.dataframe(df_tab, use_container_width=True)
     else:
-        st.info("No hay consumo registrado.")
+        st.info("Sin registros de tabaco guardados todavía.")
 
 # =========================================================
-# SECCIÓN 5: FINANZAS PRIVADAS
+# SECCIÓN 5: FINANZAS MEJORADO (CON GRÁFICO Y CATEGORÍAS)
 # =========================================================
 with tab_finanzas:
-    st.markdown("### 💶 Dinero Personal")
-    concepto = st.text_input("Concepto:")
-    categoria = st.selectbox("Categoría:", ["🛒 Alimentación", "🏡 Hogar", "🚗 Transporte", "🎉 Ocio", "💼 Nómina", "💸 Varios"])
-    tipo = st.selectbox("Tipo:", ["Gasto", "Ingreso"])
-    cantidad = st.number_input("Cantidad (€):", min_value=0.0, value=20.0)
+    st.markdown("### 💶 Control Financiero Inteligente")
     
-    if st.button("Registrar Movimiento", use_container_width=True):
-        cursor = conn.cursor()
-        cursor.execute("INSERT INTO finanzas (username, concepto, categoria, tipo, cantidad, fecha) VALUES (?, ?, ?, ?, ?, ?)", 
-                       (user, concepto, categoria, tipo, cantidad, str(datetime.date.today())))
-        conn.commit()
-        st.success("¡Movimiento financiero guardado!")
-        st.rerun()
+    col_f1, col_f2 = st.columns(2)
+    with col_f1:
+        concepto = st.text_input("Concepto del movimiento:", placeholder="Ej: Compra supermercado, Nómina...")
+        categoria = st.selectbox("Categoría:", ["🛒 Alimentación", "🏡 Hogar", "🚗 Transporte", "🎉 Ocio", "💼 Nómina", "💸 Varios"])
+    with col_f2:
+        tipo = st.selectbox("Tipo:", ["Gasto", "Ingreso"])
+        cantidad = st.number_input("Cantidad (€):", min_value=0.0, value=20.0, step=5.0)
+    
+    if st.button("💾 Registrar Movimiento Financiero", use_container_width=True):
+        if concepto.strip():
+            cursor = conn.cursor()
+            cursor.execute("INSERT INTO finanzas (username, concepto, categoria, tipo, cantidad, fecha) VALUES (?, ?, ?, ?, ?, ?)", 
+                           (user, concepto, categoria, tipo, cantidad, str(datetime.date.today())))
+            conn.commit()
+            st.success("¡Movimiento registrado!")
+            st.rerun()
+        else:
+            st.warning("Introduce un concepto válido.")
 
     st.divider()
+    st.markdown("#### 📈 Historial y Análisis Financiero")
     df_fin_show = pd.read_sql_query("SELECT concepto as Concepto, categoria as Categoría, tipo as Tipo, cantidad as 'Cantidad (€)', fecha as Fecha FROM finanzas WHERE username = ?", conn, params=(user,))
+    
     if not df_fin_show.empty:
+        # Gráfico por categoría si hay gastos
+        df_gastos = df_fin_show[df_fin_show["Tipo"] == "Gasto"]
+        if not df_gastos.empty:
+            st.markdown("##### 🔻 Gastos por Categoría")
+            gastos_cat = df_gastos.groupby("Categoría")["Cantidad (€)"].sum()
+            st.bar_chart(gastos_cat)
+            
+        st.markdown("##### 📋 Listado Completo")
         st.dataframe(df_fin_show, use_container_width=True)
     else:
-        st.info("Aún no tienes movimientos registrados.")
+        st.info("Aún no tienes movimientos financieros registrados.")
 
 # =========================================================
-# SECCIÓN 6: COMPRAS PRIVADAS
+# SECCIÓN 6: LISTA DE LA COMPRA MEJORADO
 # =========================================================
 with tab_compras:
-    st.markdown("### 🛒 Lista de la Compra")
-    nuevo_item = st.text_input("Añadir producto:", placeholder="Ej: Leche, Huevos, Manzanas...")
-    if st.button("➕ Añadir Producto", use_container_width=True) and nuevo_item:
+    st.markdown("### 🛒 Lista de la Compra Interactiva")
+    
+    col_c1, col_c2 = st.columns([3, 1])
+    with col_c1:
+        nuevo_item = st.text_input("Añadir producto al carrito:", placeholder="Ej: Leche, Huevos, Café...", label_visibility="collapsed")
+    with col_c2:
+        btn_add_compra = st.button("➕ Añadir", use_container_width=True)
+        
+    if btn_add_compra and nuevo_item.strip():
         cursor = conn.cursor()
-        cursor.execute("INSERT INTO compras (username, item, comprado) VALUES (?, ?, 0)", (user, nuevo_item))
+        cursor.execute("INSERT INTO compras (username, item, comprado) VALUES (?, ?, 0)", (user, nuevo_item.strip()))
         conn.commit()
         st.rerun()
 
@@ -424,41 +467,57 @@ with tab_compras:
         st.info("Tu lista de la compra está vacía.")
 
 # =========================================================
-# SECCIÓN 7: DEPORTE PRIVADO
+# SECCIÓN 7: DEPORTE MEJORADO
 # =========================================================
 with tab_deporte:
-    st.markdown("### 🏃 Registro de Entrenamientos")
-    f_dep = st.date_input("Fecha:", datetime.date.today(), key="fd")
-    act = st.text_input("Actividad (Ej: Gimnasio, Bici):")
-    cal = st.number_input("Calorías (kcal):", min_value=0, value=300)
+    st.markdown("### 🏃 Actividad Física y Deporte")
     
-    if st.button("Guardar Entrenamiento", use_container_width=True):
-        cursor = conn.cursor()
-        cursor.execute("INSERT INTO deporte (username, fecha, actividad, calorias) VALUES (?, ?, ?, ?)", (user, str(f_dep), act, cal))
-        conn.commit()
-        st.success("¡Entrenamiento guardado!")
-        st.rerun()
+    col_d1, col_d2 = st.columns(2)
+    with col_d1:
+        f_dep = st.date_input("Fecha:", datetime.date.today(), key="fd")
+        act = st.text_input("Actividad:", placeholder="Ej: Gimnasio, Running, Ciclismo")
+    with col_d2:
+        cal = st.number_input("Calorías estimadas (kcal):", min_value=0, value=300, step=50)
+        st.markdown("<div style='height: 28px;'></div>", unsafe_allow_html=True)
+        
+    if st.button("💾 Guardar Entrenamiento", use_container_width=True):
+        if act.strip():
+            cursor = conn.cursor()
+            cursor.execute("INSERT INTO deporte (username, fecha, actividad, calorias) VALUES (?, ?, ?, ?)", (user, str(f_dep), act, cal))
+            conn.commit()
+            st.success("¡Entrenamiento guardado con éxito!")
+            st.rerun()
+        else:
+            st.warning("Introduce el nombre de la actividad.")
 
     st.divider()
-    df_dep = pd.read_sql_query("SELECT fecha as Fecha, actividad as Actividad, calorias as 'Calorías (kcal)' FROM deporte WHERE username = ?", conn, params=(user,))
+    st.markdown("#### 📋 Historial de Entrenamientos")
+    df_dep = pd.read_sql_query("SELECT fecha as Fecha, actividad as Actividad, calorias as 'Calorías (kcal)' FROM deporte WHERE username = ? ORDER BY fecha DESC", conn, params=(user,))
     if not df_dep.empty:
         st.dataframe(df_dep, use_container_width=True)
     else:
-        st.info("Sin registros de entrenamiento.")
+        st.info("Sin entrenamientos registrados.")
 
 # =========================================================
-# SECCIÓN 8: METAS PRIVADAS (ACTUALIZADO CON ESTADO VISUAL)
+# SECCIÓN 8: METAS Y OBJETIVOS MEJORADO
 # =========================================================
 with tab_metas:
     st.markdown("### 🎯 Metas y Objetivos Personales")
-    nueva_meta = st.text_input("Nueva meta:", placeholder="Ej: Ahorrar 500€, Leer 5 libros...")
-    if st.button("➕ Añadir Meta", use_container_width=True) and nueva_meta:
+    
+    col_m1, col_m2 = st.columns([3, 1])
+    with col_m1:
+        nueva_meta = st.text_input("Nueva meta:", placeholder="Ej: Ahorrar 500€, Leer 5 libros...", label_visibility="collapsed")
+    with col_m2:
+        btn_add_meta = st.button("➕ Crear Meta", use_container_width=True)
+        
+    if btn_add_meta and nueva_meta.strip():
         cursor = conn.cursor()
-        cursor.execute("INSERT INTO metas (username, meta, estado) VALUES (?, ?, '0')", (user, nueva_meta))
+        cursor.execute("INSERT INTO metas (username, meta, estado) VALUES (?, ?, '0')", (user, nueva_meta.strip()))
         conn.commit()
         st.rerun()
 
     st.divider()
+    st.markdown("#### 🏆 Tus Objetivos Activos")
     df_metas = pd.read_sql_query("SELECT id, meta, estado FROM metas WHERE username = ?", conn, params=(user,))
     
     if not df_metas.empty:
@@ -476,7 +535,6 @@ with tab_metas:
                     conn.commit()
                     st.rerun()
             with cm2:
-                # Indicador visual claro del estado de la meta
                 if completada:
                     st.markdown("<span style='color: #4ade80; font-weight: 700;'>✅ Completada</span>", unsafe_allow_html=True)
                 else:
