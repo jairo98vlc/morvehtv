@@ -11,7 +11,7 @@ st.set_page_config(
     page_title="Dashboard Pro | Móvil & PC",
     page_icon="📱",
     layout="wide",
-    initial_sidebar_state="collapsed"  # Oculta la barra lateral por defecto en móviles
+    initial_sidebar_state="collapsed"
 )
 
 # ---------------------------------------------------------
@@ -23,7 +23,6 @@ st.markdown("""
             background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 40%, #31103f 100%);
             color: #f8fafc;
         }
-        /* Tarjetas estilo Glassmorphism adaptables */
         .metric-card {
             background: rgba(30, 41, 59, 0.7);
             backdrop-filter: blur(12px);
@@ -33,7 +32,6 @@ st.markdown("""
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
             margin-bottom: 10px;
         }
-        /* Botones táctiles optimizados */
         .stButton>button {
             border-radius: 12px;
             font-weight: 700;
@@ -48,7 +46,6 @@ st.markdown("""
             transform: scale(1.01);
             box-shadow: 0 0 12px rgba(168, 85, 247, 0.6);
         }
-        /* Media queries para pantallas muy pequeñas (móviles) */
         @media (max-width: 640px) {
             h1 { font-size: 1.6rem !important; }
             h2 { font-size: 1.3rem !important; }
@@ -113,7 +110,7 @@ def verificar_usuario(username, password):
     return False
 
 # ---------------------------------------------------------
-# 4. Autenticación (Login / Registro Adaptado)
+# 4. Autenticación (Login / Registro)
 # ---------------------------------------------------------
 if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
@@ -153,7 +150,7 @@ if not st.session_state.logged_in:
     st.stop()
 
 # ---------------------------------------------------------
-# 5. Panel Principal y Menú Lateral Móvil
+# 5. Panel Principal y Menú
 # ---------------------------------------------------------
 user = st.session_state.username
 conn = sqlite3.connect("database.db", check_same_thread=False)
@@ -309,7 +306,7 @@ elif seccion == "🏃 Deporte":
     if st.button("Guardar Entreno", use_container_width=True):
         cursor = conn.cursor()
         cursor.execute("INSERT INTO deporte (username, fecha, actividad, calorias) VALUES (?, ?, ?, ?)", (user, str(f_dep), act, cal))
-    data = conn.commit()
+        conn.commit()
         st.success("¡Entreno guardado!")
         st.rerun()
 
