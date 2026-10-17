@@ -120,9 +120,8 @@ def init_db():
     cursor.execute('''CREATE TABLE IF NOT EXISTS compras (id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT, item TEXT, comprado INTEGER)''')
     cursor.execute('''CREATE TABLE IF NOT EXISTS diario (username TEXT, fecha TEXT, animo TEXT, resumen TEXT, PRIMARY KEY (username, fecha))''')
     cursor.execute('''CREATE TABLE IF NOT EXISTS deporte (username TEXT, fecha TEXT, actividad TEXT, calorias INTEGER)''')
-    cursor.execute('''CREATE TABLE IF NOT EXISTS agua (username TEXT, fecha TEXT, vasos INTEGER, PRIMARY KEY (username, fecha))''')
-    cursor.execute('''CREATE TABLE IF NOT EXISTS sueno (username TEXT, fecha TEXT, horas REAL, calidad TEXT, PRIMARY KEY (username, fecha))''')
     cursor.execute('''CREATE TABLE IF NOT EXISTS metas (id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT, meta TEXT, estado TEXT)''')
+    cursor.execute('''CREATE TABLE IF NOT EXISTS habitos (id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT, habito TEXT, completado INTEGER, fecha TEXT)''')
     
     conn.commit()
     conn.close()
@@ -207,41 +206,45 @@ with col_head2:
         st.session_state.username = ""
         st.rerun()
 
-# Pestañas Principales
-tab_resumen, tab_diario, tab_tabaco, tab_finanzas, tab_compras, tab_deporte, tab_salud, tab_metas = st.tabs([
-    "📊 Resumen", "📖 Diario", "🚬 Tabaco", "💶 Dinero", "🛒 Compra", "🏃 Deporte", "💧 Salud", "🎯 Metas"
+# Pestañas Principales (Sin Agua ni Sueño, con Hábitos)
+tab_resumen, tab_diario, tab_habitos, tab_tabaco, tab_finanzas, tab_compras, tab_deporte, tab_metas = st.tabs([
+    "📊 Resumen", "📖 Diario", "⚡ Hábitos", "🚬 Tabaco", "💶 Dinero", "🛒 Compra", "🏃 Deporte", "🎯 Metas"
 ])
 
 # =========================================================
-# SECCIÓN 1: RESUMEN GENERAL (NUEVO)
+# SECCIÓN 1: RESUMEN GENERAL
 # =========================================================
 with tab_resumen:
     st.markdown("### ⚡ Visión General de tu Vida")
     
-    # Consultas rápidas para las métricas globales
     df_fin = pd.read_sql_query("SELECT tipo, cantidad FROM finanzas WHERE username = ?", conn, params=(user,))
     df_tab = pd.read_sql_query("SELECT cigarros, gasto FROM tabaco WHERE username = ?", conn, params=(user,))
-    df_sueno = pd.read_sql_query("SELECT horas FROM sueno WHERE username = ?", conn, params=(user,))
     df_metas = pd.read_sql_query("SELECT estado FROM metas WHERE username = ?", conn, params=(user,))
+    df_hab = pd.read_sql_query("SELECT completado FROM habitos WHERE username = ? AND fecha = ?", conn, params=(user, str(datetime.date.today())))
     
     ingresos = df_fin[df_fin["tipo"] == "Ingreso"]["cantidad"].sum() if not df_fin.empty else 0
     gastos = df_fin[df_fin["tipo"] == "Gasto"]["cantidad"].sum() if not df_fin.empty else 0
     balance = ingresos - gastos
     
     tot_cigarros = int(df_tab["cigarros"].sum()) if not df_tab.empty else 0
-    avg_sueno = round(df_sueno["horas"].mean(), 1) if not df_sueno.empty else 0
+    tot_gasto_tabaco = df_tab["gasto"].sum() if not df_tab.empty else 0
     metas_cumplidas = len(df_metas[df_metas["estado"] == "1"]) if not df_metas.empty else 0
+    habitos_hoy = len(df_hab[df_hab["completado"] == 1]) if not df_hab.empty else 0
 
     c_r1, c_r2 = st.columns(2)
     with c_r1:
         st.metric("💶 Balance Neto", f"{balance:.2f} €")
-        st.metric("🚬 Total Cigarros", f"{tot_cigarros} uds")
+        st.metric("🚬 Gasto en Tabaco", f"{tot_gasto_tabaco:.2f} €")
     with c_r2:
-        st.metric("💤 Media de Sueño", f"{avg_sueno} hrs/noche")
-        st.metric("🎯 Metas Cumplidas", f"{metas_cumplidas} listos")
+        st.metric("⚡ Hábitos Cumplidos Hoy", f"{habitos_hoy} listos")
+        st.metric("🎯 Metas Totales", f"{metas_cumplidas} completadas")
 
     st.divider()
-    st.info("💡 **Consejo Diario:** Mantén tus registros al día para visualizar tus tendencias semanales de salud y finanzas.")
+    st.caption("💡 Exportación de Copia de Seguridad:")
+    if st.button("📥 Descargar Mis Finanzas (CSV)"):
+        df_fin_all = pd.read_sql_query("SELECT * FROM finanzas WHERE username = ?", conn, params=(user,))
+        csv = df_fin_all.to_csv(index=False).encode('utf-8')
+        st.download_button("Descargar Archivo CSV", csv, "mis_finanzas.csv", "text/csv")
 
 # =========================================================
 # SECCIÓN 2: DIARIO
@@ -270,10 +273,50 @@ with tab_diario:
         st.info("Sin entradas guardadas.")
 
 # =========================================================
-# SECCIÓN 3: TABACO
+# SECCIÓN 3: HÁBITOS DIARIOS (NUEVO)
+# =========================================================
+with tab_habitos:
+    st.markdown("### ⚡ Rutinas y Hábitos Diarios")
+    nuevo_habito = st.text_input("Añadir nuevo hábito recurrente:", placeholder="Ej: Meditar 10m, Leer 20 págs, Beber té...")
+    if st.button("➕ Crear Hábito", use_container_width=True) and nuevo_habito:
+        cursor = conn.cursor()
+        cursor.execute("INSERT INTO habitos (username, habito, completado, fecha) VALUES (?, ?, 0, ?)", 
+                       (user, nuevo_habito, str(datetime.date.today())))
+        conn.commit()
+        st.rerun()
+
+    st.divider()
+    st.markdown(f"#### 📅 Hábitos para hoy: {datetime.date.today().strftime('%d/%m/%Y')}")
+    df_hab = pd.read_sql_query("SELECT id, habito, completado FROM habitos WHERE username = ? AND fecha = ?", conn, params=(user, str(datetime.date.today())))
+    
+    if not df_hab.empty:
+        for _, row in df_hab.iterrows():
+            h_id = row['id']
+            h_text = row['habito']
+            h_state = bool(row['completado'])
+            
+            c_h1, c_h2 = st.columns([4, 1])
+            with c_h1:
+                done = st.checkbox(h_text, value=h_state, key=f"hab_{h_id}")
+                if done != h_state:
+                    cursor = conn.cursor()
+                    cursor.execute("UPDATE habitos SET completado = ? WHERE id = ?", (1 if done else 0, h_id))
+                    conn.commit()
+                    st.rerun()
+            with c_h2:
+                if st.button("🗑️", key=f"del_hab_{h_id}"):
+                    cursor = conn.cursor()
+                    cursor.execute("DELETE FROM habitos WHERE id = ?", (h_id,))
+                    conn.commit()
+                    st.rerun()
+    else:
+        st.info("No hay hábitos configurados para hoy. ¡Añade uno arriba!")
+
+# =========================================================
+# SECCIÓN 4: TABACO
 # =========================================================
 with tab_tabaco:
-    st.markdown("### 🚬 Control de Tabaco")
+    st.markdown("### 🚬 Control de Tabaco y Ahorro")
     f_tab = st.date_input("Fecha:", datetime.date.today(), key="f_tab")
     n_cig = st.number_input("Cigarros fumados:", min_value=0, value=5)
     p_caj = st.number_input("Precio cajetilla (20 uds):", value=5.0)
@@ -295,7 +338,7 @@ with tab_tabaco:
         st.info("Sin registros de tabaco.")
 
 # =========================================================
-# SECCIÓN 4: FINANZAS
+# SECCIÓN 5: FINANZAS
 # =========================================================
 with tab_finanzas:
     st.markdown("### 💶 Dinero Personal")
@@ -320,7 +363,7 @@ with tab_finanzas:
         st.info("Sin movimientos financieros.")
 
 # =========================================================
-# SECCIÓN 5: COMPRAS
+# SECCIÓN 6: COMPRAS
 # =========================================================
 with tab_compras:
     st.markdown("### 🛒 Lista de la Compra")
@@ -358,7 +401,7 @@ with tab_compras:
         st.info("La lista está vacía.")
 
 # =========================================================
-# SECCIÓN 6: DEPORTE
+# SECCIÓN 7: DEPORTE
 # =========================================================
 with tab_deporte:
     st.markdown("### 🏃 Actividad Física")
@@ -379,36 +422,6 @@ with tab_deporte:
         st.dataframe(df_dep, use_container_width=True)
     else:
         st.info("Sin entrenamientos registrados.")
-
-# =========================================================
-# SECCIÓN 7: SALUD
-# =========================================================
-with tab_salud:
-    st.markdown("### 💧 Hidratación y Sueño")
-    
-    col_s1, col_s2 = st.columns(2)
-    with col_s1:
-        st.markdown("#### 💧 Agua")
-        f_agua = st.date_input("Fecha:", datetime.date.today(), key="f_agua")
-        vasos = st.number_input("Vasos (250ml):", min_value=0, max_value=20, value=6)
-        if st.button("Guardar Agua", use_container_width=True):
-            cursor = conn.cursor()
-            cursor.execute("INSERT OR REPLACE INTO agua (username, fecha, vasos) VALUES (?, ?, ?)", (user, str(f_agua), vasos))
-            conn.commit()
-            st.success("¡Actualizado!")
-            st.rerun()
-            
-    with col_s2:
-        st.markdown("#### 💤 Sueño")
-        f_sueno = st.date_input("Fecha:", datetime.date.today(), key="f_sueno_date")
-        horas = st.number_input("Horas dormidas:", min_value=0.0, max_value=16.0, value=7.5, step=0.5)
-        calidad = st.selectbox("Calidad:", ["😴 Excelente", "🙂 Buena", "😐 Regular", "😫 Mala"])
-        if st.button("Guardar Sueño", use_container_width=True):
-            cursor = conn.cursor()
-            cursor.execute("INSERT OR REPLACE INTO sueno (username, fecha, horas, calidad) VALUES (?, ?, ?, ?)", (user, str(f_sueno), horas, calidad))
-            conn.commit()
-            st.success("¡Guardado!")
-            st.rerun()
 
 # =========================================================
 # SECCIÓN 8: METAS
