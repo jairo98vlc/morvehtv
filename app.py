@@ -1,91 +1,120 @@
 import streamlit as st
+import pandas as pd
 import datetime
 
 # ---------------------------------------------------------
 # 1. Configuración de la página
 # ---------------------------------------------------------
 st.set_page_config(
-    page_title="365Scores — Marcadores en Vivo",
-    page_icon="⚡",
+    page_title="Mi Control Personal | Salud y Finanzas",
+    page_icon="📊",
     layout="wide",
-    initial_sidebar_state="collapsed"
+    initial_sidebar_state="expanded"
 )
 
+# Estilo personalizado en modo oscuro
 st.markdown("""
     <style>
         .stApp { background-color: #121212; color: #e0e0e0; }
-        .stButton>button {
-            border-radius: 12px;
-            font-weight: 600;
+        .metric-card {
             background-color: #1e1e1e;
-            color: #ffffff;
             border: 1px solid #333333;
+            padding: 15px;
+            border-radius: 12px;
+            text-align: center;
         }
-        .stButton>button:hover { border-color: #ff3b30; color: #ff3b30; }
-        .live-tag { color: #ff3b30; font-weight: bold; }
     </style>
 """, unsafe_allow_html=True)
 
 # ---------------------------------------------------------
-# 2. Cabecera y Selector de Fecha Actual
+# 2. Inicialización de la Base de Datos (Session State)
 # ---------------------------------------------------------
-c1, c2, c3 = st.columns([2, 5, 2])
-with c1:
-    st.markdown("### ⚡ **365Scores**")
-with c2:
-    st.text_input("🔍 Buscar partidos, equipos o ligas...", placeholder="Ej: Real Madrid, Premier League...", label_visibility="collapsed")
-with c3:
-    st.markdown(f"📅 **Hoy:** {datetime.date.today().strftime('%d/%m/%Y')}")
+if "registros" not in st.session_state:
+    # Datos de ejemplo iniciales para visualizar los gráficos
+    hoy = datetime.date.today()
+    st.session_state.registros = pd.DataFrame([
+        {"Fecha": hoy - datetime.timedelta(days=6), "Cigarros": 8, "Deporte": "Sí (30m Gimnasio)", "Gasto (€)": 2.40},
+        {"Fecha": hoy - datetime.timedelta(days=5), "Cigarros": 6, "Deporte": "No", "Gasto (€)": 1.80},
+        {"Fecha": hoy - datetime.timedelta(days=4), "Cigarros": 10, "Deporte": "Sí (45m Carrera)", "Gasto (€)": 3.00},
+        {"Fecha": hoy - datetime.timedelta(days=3), "Cigarros": 5, "Deporte": "Sí (60m Bici)", "Gasto (€)": 1.50},
+        {"Fecha": hoy - datetime.timedelta(days=2), "Cigarros": 7, "Deporte": "No", "Gasto (€)": 2.10},
+        {"Fecha": hoy - datetime.timedelta(days=1), "Cigarros": 4, "Deporte": "Sí (40m Gimnasio)", "Gasto (€)": 1.20},
+        {"Fecha": hoy, "Cigarros": 3, "Deporte": "Sí (30m Caminata)", "Gasto (€)": 0.90},
+    ])
+
+# ---------------------------------------------------------
+# 3. Barra Lateral: Formulario para añadir registro diario
+# ---------------------------------------------------------
+with st.sidebar:
+    st.header("📝 Registrar Día")
+    
+    fecha = st.date_input("Fecha", datetime.date.today())
+    cigarros = st.number_input("Cigarros fumados:", min_value=0, max_value=100, value=5, step=1)
+    
+    # Precio estimado por cigarrillo (configurable)
+    precio_cajetilla = st.number_input("Precio cajetilla 20 cig. (€):", min_value=1.0, max_value=20.0, value=5.0, step=0.10)
+    precio_por_cigarro = precio_cajetilla / 20.0
+    gasto_calculado = round(cigarros * precio_por_cigarro, 2)
+    
+    st.caption(f"💰 Gasto estimado hoy: **{gasto_calculado} €**")
+    
+    hizo_deporte = st.selectbox("¿Has hecho deporte hoy?", ["No", "Sí (Gimnasio)", "Sí (Carrera/Running)", "Sí (Ciclismo)", "Sí (Caminata)", "Sí (Otro)"])
+    
+    if st.button("➕ Guardar Registro", use_container_width=True, type="primary"):
+        nuevo_registro = pd.DataFrame([{
+            "Fecha": fecha,
+            "Cigarros": cigarros,
+            "Deporte": hizo_deporte,
+            "Gasto (€)": gasto_calculado
+        }])
+        
+        # Eliminar si ya existe un registro en la misma fecha y concatenar el nuevo
+        st.session_state.registros = st.session_state.registros[st.session_state.registros["Fecha"] != fecha]
+        st.session_state.registros = pd.concat([st.session_state.registros, nuevo_registro], ignore_index=True)
+        st.session_state.registros = st.session_state.registros.sort_values(by="Fecha")
+        st.success("¡Día registrado correctamente!")
+
+# ---------------------------------------------------------
+# 4. Panel Principal: Resumen Semanal y Métricas
+# ---------------------------------------------------------
+st.title("💪 Dashboard de Control Personal")
+st.subheader("Seguimiento de hábitos, salud y finanzas")
+
+df = st.session_state.registros.copy()
+
+# Cálculo de totales semanales
+total_cigarros = df["Cigarros"].sum()
+total_gasto = round(df["Gasto (€)"].sum(), 2)
+dias_deporte = len(df[df["Deporte"] != "No"])
+
+col1, col2, col3 = st.columns(3)
+with col1:
+    st.metric(label="🚬 Cigarros (Semana)", value=f"{total_cigarros} cig", delta=f"-{df['Cigarros'].iloc[-1]} hoy", delta_color="inverse")
+with col2:
+    st.metric(label="💰 Gasto Total", value=f"{total_gasto} €", delta=f"{df['Gasto (€)'].iloc[-1]} € hoy", delta_color="inverse")
+with col3:
+    st.metric(label="🏃 Días de Deporte", value=f"{dias_deporte} / {len(df)} días", delta="¡Sigue así!" if dias_deporte > 3 else "¡A entrenar!")
 
 st.divider()
 
 # ---------------------------------------------------------
-# 3. Pestañas Principales (En Vivo / Clasificación / Noticias)
+# 5. Gráficos Progresivos
 # ---------------------------------------------------------
-tab_live, tab_standings, tab_news = st.tabs(["🔴 Partidos en Directo", "📊 Clasificación Oficial", "📰 Última Hora"])
+tab_graficos, tab_tabla = st.tabs(["📈 Gráficos y Evolución", "📋 Historial Completo"])
 
-with tab_live:
-    st.markdown("### 🏆 Partidos Destacados de la Jornada Actual")
+with tab_graficos:
+    col_g1, col_g2 = st.columns(2)
     
-    # Bloque de partidos en vivo reales sincronizados con la fecha de hoy
-    partidos_hoy = [
-        {"liga": "🇪🇸 LALIGA EA SPORTS", "local": "Real Madrid", "visitante": "FC Barcelona", "goles": "2 - 1", "estado": "🔴 78' En Directo", "estadio": "Santiago Bernabéu"},
-        {"liga": "🏴󠁧󠁢󠁥󠁮󠁧󠁿 PREMIER LEAGUE", "local": "Manchester City", "visitante": "Arsenal", "goles": "0 - 0", "estado": "⏱️ 15' 1ª Parte", "estadio": "Etihad Stadium"},
-        {"liga": "🇮🇹 SERIE A", "local": "Inter de Milán", "visitante": "Juventus", "goles": "1 - 1", "estado": "🔴 62' En Directo", "estadio": "San Siro"},
-        {"liga": "🇩🇪 BUNDESLIGA", "local": "Bayern de Múnich", "visitante": "Borussia Dortmund", "goles": "3 - 2", "estado": "✅ Finalizado", "estadio": "Allianz Arena"}
-    ]
-    
-    for p in partidos_hoy:
-        with st.container():
-            col_m1, col_m2, col_m3 = st.columns([3, 1, 1])
-            with col_m1:
-                st.caption(f"{p['liga']} · {p['estadio']}")
-                st.write(f"⚽ **{p['local']}** vs **{p['visitante']}**")
-                st.markdown(f"<span class='live-tag'>{p['estado']}</span>", unsafe_allow_html=True)
-            with col_m2:
-                st.write("Marcador")
-                st.markdown(f"### **{p['goles']}**")
-            with col_m3:
-                st.write("Detalles")
-                st.button("📊 Estadísticas", key=f"btn_{p['local']}", use_container_width=True)
-            st.divider()
+    with col_g1:
+        st.markdown("### 🚬 Evolución del Consumo de Tabaco")
+        st.bar_chart(df.set_index("Fecha")["Cigarros"])
+        
+    with col_g2:
+        st.markdown("### 💶 Gasto Diario en Tabaco (€)")
+        st.line_chart(df.set_index("Fecha")["Gasto (€)"])
 
-with tab_standings:
-    st.markdown("### 📊 Tabla de Clasificación en Vivo")
-    st.markdown("""
-    | Pos | Equipo | Pts | PJ | G | E | P | GF | GC |
-    |:---:|:---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
-    | 🥇 **1** | Real Madrid | **78** | 32 | 24 | 6 | 2 | 70 | 22 |
-    | 🥈 **2** | FC Barcelona | **74** | 32 | 23 | 5 | 4 | 74 | 30 |
-    | 🥉 **3** | Girona FC | **67** | 32 | 20 | 7 | 5 | 65 | 38 |
-    | **4** | Atlético de Madrid | **63** | 32 | 19 | 6 | 7 | 60 | 35 |
-    """)
+with tab_tabla:
+    st.markdown("### 📜 Registros Guardados")
+    st.dataframe(df.sort_values(by="Fecha", ascending=False), use_container_width=True)
 
-with tab_news:
-    st.markdown("### 📰 Actualidad Deportiva al Minuto")
-    st.info("🔄 Sincronizado con los principales portales de noticias deportivas.")
-    st.write("• **Fútbol:** Máxima tensión en la recta final de las grandes ligas europeas.")
-    st.write("• **Fórmula 1:** Última hora sobre los test de libres y configuraciones de monoplazas.")
-    st.write("• **Tenis:** Resultados y cruces confirmados para los cuartos de final del torneo.")
-
-st.caption("© 2026 365Scores Clone — Motor de resultados en tiempo real.")
+st.caption("© 2026 Dashboard Personal — Control diario de hábitos.")
