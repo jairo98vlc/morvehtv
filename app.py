@@ -8,8 +8,8 @@ import hashlib
 # 1. Configuración de la página (Optimizada para Móviles & PWA)
 # ---------------------------------------------------------
 st.set_page_config(
-    page_title="Dashboard Pro",
-    page_icon="📱",
+    page_title="Dashboard Pro | Control Total",
+    page_icon="🚀",
     layout="wide",
     initial_sidebar_state="collapsed"
 )
@@ -18,7 +18,6 @@ st.set_page_config(
 # 2. Metaetiquetas PWA & Inyección CSS Ultra-Responsiva
 # ---------------------------------------------------------
 st.markdown("""
-    <!-- Metaetiquetas PWA e iOS Safe Area -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -26,16 +25,12 @@ st.markdown("""
     <meta name="apple-mobile-web-app-title" content="DashboardPro">
     <meta name="theme-color" content="#0f172a">
     <link rel="apple-touch-icon" href="https://img.icons8.com/isometric/512/dashboard.png">
-    <link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIkRhc2hib2FyZCBQcm8gRGFpbHkiLAogICJzaG9ydF9uYW1lIjogIkRhc2hib2FyZFAiLAogICJzdGFydF91cmwiOiAiLi8iLAogICJkaXNwbGF5IjogInN0YW5kYWxvbmUiLAogICJiYWNrZ3JvdW5kX2NvbG9yIjogIiMwZjE3MmEiLAogICJ0aGVtZV9jb2xvciI6ICIjMGYxNzJhIiwKICAiaWNvbnMiOiBbCiAgICB7CiAgICAgICJzcmMiOiAiaHR0cHM6Ly9pbWcuaWNvbnM4LmNvbS9pc29tZXRyaWMvNTEyL2Rhc2hib2FyZC5wbmciLAogICAgICAic2l6ZXMiOiAiNTEyeDUxMiIsCiAgICAgICJ0eXBlIjogImltYWdlL3BuZyIKICAgIH0KICBdCn0=">
-
+    
     <style>
-        /* Fondo general */
         .stApp {
             background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 40%, #31103f 100%);
             color: #f8fafc;
         }
-
-        /* Ajustes de contenedores para pantallas pequeñas */
         .main .block-container {
             padding-left: 0.75rem !important;
             padding-right: 0.75rem !important;
@@ -43,24 +38,10 @@ st.markdown("""
             padding-bottom: 2rem !important;
             max-width: 100% !important;
         }
-
-        /* Ocultar elementos innecesarios en móviles */
         #MainMenu {visibility: hidden;}
         footer {visibility: hidden;}
         header {visibility: hidden;}
 
-        /* Estilo de Tarjetas Glassmorphism táctiles */
-        .metric-card {
-            background: rgba(30, 41, 59, 0.75);
-            backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            padding: 14px;
-            border-radius: 16px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
-            margin-bottom: 12px;
-        }
-
-        /* Botones optimizados para toque táctil fácil */
         .stButton>button {
             border-radius: 14px !important;
             font-weight: 700 !important;
@@ -69,15 +50,12 @@ st.markdown("""
             color: white !important;
             border: none !important;
             width: 100% !important;
-            min-height: 48px !important; /* Altura ideal táctil móvil */
+            min-height: 48px !important;
             margin-top: 4px;
             margin-bottom: 4px;
         }
-        .stButton>button:active {
-            transform: scale(0.98);
-        }
+        .stButton>button:active { transform: scale(0.98); }
 
-        /* Inputs y Selects táctiles */
         .stTextInput>div>div>input, .stNumberInput>div>div>input, .stSelectbox>div>div>div, .stDateInput>div>div>input {
             border-radius: 12px !important;
             min-height: 44px !important;
@@ -86,9 +64,8 @@ st.markdown("""
             border: 1px solid rgba(255, 255, 255, 0.15) !important;
         }
 
-        /* Tabs de navegación móvil mejoradas */
         .stTabs [data-baseweb="tab-list"] {
-            gap: 6px;
+            gap: 4px;
             background-color: rgba(15, 23, 42, 0.5);
             padding: 6px;
             border-radius: 16px;
@@ -96,42 +73,28 @@ st.markdown("""
             overflow-x: auto;
             white-space: nowrap;
         }
-
         .stTabs [data-baseweb="tab"] {
-            height: 40px;
+            height: 38px;
             border-radius: 10px;
             color: #94a3b8;
             font-weight: 600;
-            font-size: 0.85rem;
-            padding: 0 12px;
+            font-size: 0.8rem;
+            padding: 0 10px;
         }
-
         .stTabs [aria-selected="true"] {
             background-color: #6366f1 !important;
             color: #ffffff !important;
-        }
-
-        /* Tablas adaptables */
-        .stDataFrame {
-            border-radius: 12px;
-            overflow: hidden;
-        }
-
-        /* Tipografía responsiva */
-        @media (max-width: 640px) {
-            h1 { font-size: 1.4rem !important; }
-            h2 { font-size: 1.2rem !important; }
-            h3 { font-size: 1.0rem !important; }
         }
     </style>
 """, unsafe_allow_html=True)
 
 # ---------------------------------------------------------
-# 3. Inicialización y Base de Datos SQLite
+# 3. Inicialización de Base de Datos SQLite (Nuevas Tablas)
 # ---------------------------------------------------------
 def init_db():
     conn = sqlite3.connect("database.db", check_same_thread=False)
     cursor = conn.cursor()
+    
     cursor.execute('''CREATE TABLE IF NOT EXISTS users (username TEXT PRIMARY KEY, password TEXT)''')
     cursor.execute('''CREATE TABLE IF NOT EXISTS tabaco (username TEXT, fecha TEXT, cigarros INTEGER, gasto REAL)''')
     cursor.execute('''CREATE TABLE IF NOT EXISTS finanzas (username TEXT, concepto TEXT, categoria TEXT, tipo TEXT, cantidad REAL, fecha TEXT)''')
@@ -144,6 +107,11 @@ def init_db():
     cursor.execute('''CREATE TABLE IF NOT EXISTS compras (id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT, item TEXT, comprado INTEGER)''')
     cursor.execute('''CREATE TABLE IF NOT EXISTS diario (username TEXT, fecha TEXT, animo TEXT, resumen TEXT, PRIMARY KEY (username, fecha))''')
     cursor.execute('''CREATE TABLE IF NOT EXISTS deporte (username TEXT, fecha TEXT, actividad TEXT, calorias INTEGER)''')
+    
+    # Nuevas tablas añadidas
+    cursor.execute('''CREATE TABLE IF NOT EXISTS agua (username TEXT, fecha TEXT, vasos INTEGER, PRIMARY KEY (username, fecha))''')
+    cursor.execute('''CREATE TABLE IF NOT EXISTS sueno (username TEXT, fecha TEXT, horas REAL, calidad TEXT, PRIMARY KEY (username, fecha))''')
+    cursor.execute('''CREATE TABLE IF NOT EXISTS metas (id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT, meta TEXT, estado TEXT)''')
     
     conn.commit()
     conn.close()
@@ -176,17 +144,17 @@ def verificar_usuario(username, password):
     return False
 
 # ---------------------------------------------------------
-# 4. Autenticación (Login / Registro Adaptado)
+# 4. Autenticación (Login / Registro)
 # ---------------------------------------------------------
 if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
     st.session_state.username = ""
 
 if not st.session_state.logged_in:
-    st.markdown("<h2 style='text-align: center; color: #a855f7; margin-top: 1rem;'>📱 Dashboard Pro</h2>", unsafe_allow_html=True)
-    st.markdown("<p style='text-align: center; color: #94a3b8; font-size: 0.9rem;'>Accede a tu panel personal desde tu móvil.</p>", unsafe_allow_html=True)
+    st.markdown("<h2 style='text-align: center; color: #a855f7; margin-top: 1rem;'>🚀 Dashboard Pro</h2>", unsafe_allow_html=True)
+    st.markdown("<p style='text-align: center; color: #94a3b8; font-size: 0.9rem;'>Tu vida organizada en una sola app.</p>", unsafe_allow_html=True)
     
-    tab_log, tab_reg = st.tabs(["🔑 Entrar", "📝 Crear Cuenta"])
+    tab_log, tab_reg = st.tabs(["🔑 Entrar", "📝 Registro"])
     
     with tab_log:
         l_user = st.text_input("Usuario", key="l_user")
@@ -198,7 +166,7 @@ if not st.session_state.logged_in:
                 st.success("¡Acceso concedido!")
                 st.rerun()
             else:
-                st.error("Usuario o contraseña incorrectos.")
+                st.error("Datos incorrectos.")
                 
     with tab_reg:
         r_user = st.text_input("Nuevo Usuario", key="r_user")
@@ -214,12 +182,11 @@ if not st.session_state.logged_in:
     st.stop()
 
 # ---------------------------------------------------------
-# 5. Panel Principal (Navegación Táctil Móvil)
+# 5. Panel Principal y Navegación Modular Ampliada
 # ---------------------------------------------------------
 user = st.session_state.username
 conn = sqlite3.connect("database.db", check_same_thread=False)
 
-# Cabecera Móvil Compacta
 col_head1, col_head2 = st.columns([3, 1])
 with col_head1:
     st.markdown(f"👤 **{user}**")
@@ -229,9 +196,9 @@ with col_head2:
         st.session_state.username = ""
         st.rerun()
 
-# Menú por Pestañas Horizontales (Súper cómodo para móviles)
-tab_diario, tab_tabaco, tab_finanzas, tab_compras, tab_deporte = st.tabs([
-    "📖 Diario", "🚬 Tabaco", "💶 Dinero", "🛒 Compra", "🏃 Deporte"
+# Pestañas de navegación ampliadas con las nuevas funciones
+tab_diario, tab_tabaco, tab_finanzas, tab_compras, tab_deporte, tab_salud, tab_metas = st.tabs([
+    "📖 Diario", "🚬 Tabaco", "💶 Dinero", "🛒 Compra", "🏃 Deporte", "💧 Salud", "🎯 Metas"
 ])
 
 # =========================================================
@@ -241,9 +208,9 @@ with tab_diario:
     st.markdown("### 📖 Diario del Día")
     f_diario = st.date_input("Fecha:", datetime.date.today(), key="f_diario")
     animo = st.selectbox("Ánimo:", ["😄 Increíble", "🙂 Tranquilo", "😴 Cansado", "😤 Estresado", "💪 Motivado"])
-    resumen_texto = st.text_area("¿Qué has hecho hoy?", placeholder="Escribe tu día aquí...", height=120)
+    resumen_texto = st.text_area("¿Qué has hecho hoy?", placeholder="Resume tu día...", height=120)
     
-    if st.button("💾 Guardar Diario", use_container_width=True):
+    if st.button("💾 Guardar Entrada", use_container_width=True):
         cursor = conn.cursor()
         cursor.execute("INSERT OR REPLACE INTO diario (username, fecha, animo, resumen) VALUES (?, ?, ?, ?)",
                        (user, str(f_diario), animo, resumen_texto))
@@ -252,7 +219,6 @@ with tab_diario:
         st.rerun()
 
     st.divider()
-    st.markdown("#### 📜 Entradas Anteriores")
     df_diario = pd.read_sql_query("SELECT fecha as Fecha, animo as Ánimo, resumen as Resumen FROM diario WHERE username = ? ORDER BY fecha DESC", conn, params=(user,))
     if not df_diario.empty:
         for _, row in df_diario.iterrows():
@@ -276,7 +242,7 @@ with tab_tabaco:
         cursor.execute("DELETE FROM tabaco WHERE username = ? AND fecha = ?", (user, str(f_tab)))
         cursor.execute("INSERT INTO tabaco (username, fecha, cigarros, gasto) VALUES (?, ?, ?, ?)", (user, str(f_tab), n_cig, gasto))
         conn.commit()
-        st.success("¡Consumo guardado!")
+        st.success("¡Actualizado!")
         st.rerun()
 
     st.divider()
@@ -306,7 +272,7 @@ with tab_finanzas:
         cursor.execute("INSERT INTO finanzas (username, concepto, categoria, tipo, cantidad, fecha) VALUES (?, ?, ?, ?, ?, ?)", 
                        (user, concepto, categoria, tipo, cantidad, str(datetime.date.today())))
         conn.commit()
-        st.success("¡Movimiento guardado!")
+        st.success("¡Registrado!")
         st.rerun()
 
     st.divider()
@@ -319,14 +285,14 @@ with tab_finanzas:
         st.metric("Balance Neto", f"{balance:.2f} €")
         st.dataframe(df_fin, use_container_width=True)
     else:
-        st.info("Sin registros financieros.")
+        st.info("Sin movimientos financieros.")
 
 # =========================================================
 # SECCIÓN 4: COMPRAS
 # =========================================================
 with tab_compras:
     st.markdown("### 🛒 Lista de la Compra")
-    nuevo_item = st.text_input("Añadir producto:", placeholder="Ej: Leche, Café, Huevos...")
+    nuevo_item = st.text_input("Añadir producto:", placeholder="Ej: Leche, Huevos...")
     if st.button("➕ Añadir a la lista", use_container_width=True) and nuevo_item:
         cursor = conn.cursor()
         cursor.execute("INSERT INTO compras (username, item, comprado) VALUES (?, ?, 0)", (user, nuevo_item))
@@ -357,7 +323,7 @@ with tab_compras:
                     conn.commit()
                     st.rerun()
     else:
-        st.info("Lista vacía.")
+        st.info("La lista está vacía.")
 
 # =========================================================
 # SECCIÓN 5: DEPORTE
@@ -380,6 +346,90 @@ with tab_deporte:
     if not df_dep.empty:
         st.dataframe(df_dep, use_container_width=True)
     else:
-        st.info("Sin entrenamientos guardados.")
+        st.info("Sin entrenamientos registrados.")
+
+# =========================================================
+# SECCIÓN 6: SALUD (AGUA Y SUEÑO - NUEVO)
+# =========================================================
+with tab_salud:
+    st.markdown("### 💧 Hidratación y Sueño")
+    
+    col_s1, col_s2 = st.columns(2)
+    with col_s1:
+        st.markdown("#### 💧 Vasos de Agua")
+        f_agua = st.date_input("Fecha:", datetime.date.today(), key="f_agua")
+        vasos = st.number_input("Vasos (aprox. 250ml):", min_value=0, max_value=20, value=6)
+        if st.button("Guardar Agua", use_container_width=True):
+            cursor = conn.cursor()
+            cursor.execute("INSERT OR REPLACE INTO agua (username, fecha, vasos) VALUES (?, ?, ?)", (user, str(f_agua), vasos))
+            conn.commit()
+            st.success("¡Hidratación actualizada!")
+            st.rerun()
+            
+    with col_s2:
+        st.markdown("#### 💤 Control de Sueño")
+        f_sueno = st.date_input("Fecha:", datetime.date.today(), key="f_sueno_date")
+        horas = st.number_input("Horas dormidas:", min_value=0.0, max_value=16.0, value=7.5, step=0.5)
+        calidad = st.selectbox("Calidad del sueño:", ["😴 Excelente", "🙂 Buena", "😐 Regular", "😫 Mala"])
+        if st.button("Guardar Sueño", use_container_width=True):
+            cursor = conn.cursor()
+            cursor.execute("INSERT OR REPLACE INTO sueno (username, fecha, horas, calidad) VALUES (?, ?, ?, ?)", (user, str(f_sueno), horas, calidad))
+            conn.commit()
+            st.success("¡Sueño guardado!")
+            st.rerun()
+
+    st.divider()
+    st.markdown("#### 📊 Historial de Salud Reciente")
+    df_agua = pd.read_sql_query("SELECT fecha as Fecha, vasos as 'Vasos de Agua' FROM agua WHERE username = ? ORDER BY fecha DESC LIMIT 5", conn, params=(user,))
+    df_sueno = pd.read_sql_query("SELECT fecha as Fecha, horas as 'Horas Dormidas', calidad as Calidad FROM sueno WHERE username = ? ORDER BY fecha DESC LIMIT 5", conn, params=(user,))
+    
+    col_r1, col_r2 = st.columns(2)
+    with col_r1:
+        st.caption("Consumo de Agua")
+        if not df_agua.empty: st.dataframe(df_agua, use_container_width=True)
+        else: st.info("Sin registros de agua.")
+    with col_r2:
+        st.caption("Descanso / Sueño")
+        if not df_sueno.empty: st.dataframe(df_sueno, use_container_width=True)
+        else: st.info("Sin registros de sueño.")
+
+# =========================================================
+# SECCIÓN 7: METAS Y OBJETIVOS (NUEVO)
+# =========================================================
+with tab_metas:
+    st.markdown("### 🎯 Metas y Objetivos Personales")
+    
+    nueva_meta = st.text_input("Nueva meta u objetivo:", placeholder="Ej: Leer 3 libros este mes, Ahorrar 500€...")
+    if st.button("➕ Añadir Meta", use_container_width=True) and nueva_meta:
+        cursor = conn.cursor()
+        cursor.execute("INSERT INTO metas (username, meta, estado) VALUES (?, ?, 0)", (user, nueva_meta))
+        conn.commit()
+        st.rerun()
+
+    st.divider()
+    df_metas = pd.read_sql_query("SELECT id, meta, estado FROM metas WHERE username = ?", conn, params=(user,))
+    
+    if not df_metas.empty:
+        for _, row in df_metas.iterrows():
+            m_id = row['id']
+            m_text = row['meta']
+            m_est = bool(row['estado'])
+            
+            c_m1, c_m2 = st.columns([4, 1])
+            with c_m1:
+                completada = st.checkbox(m_text, value=m_est, key=f"meta_{m_id}")
+                if completada != m_est:
+                    cursor = conn.cursor()
+                    cursor.execute("UPDATE metas SET estado = ? WHERE id = ?", (1 if completada else 0, m_id))
+                    conn.commit()
+                    st.rerun()
+            with c_m2:
+                if st.button("🗑️", key=f"del_meta_{m_id}"):
+                    cursor = conn.cursor()
+                    cursor.execute("DELETE FROM metas WHERE id = ?", (m_id,))
+                    conn.commit()
+                    st.rerun()
+    else:
+        st.info("No tienes metas registradas. ¡Añade tu primer objetivo!")
 
 conn.close()
