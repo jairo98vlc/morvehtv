@@ -5,7 +5,7 @@ import sqlite3
 import hashlib
 
 # ---------------------------------------------------------
-# 1. Configuración de la página (Optimizada para PWA)
+# 1. Configuración de la página (Optimizada para Móviles & PWA)
 # ---------------------------------------------------------
 st.set_page_config(
     page_title="Dashboard Pro",
@@ -15,75 +15,123 @@ st.set_page_config(
 )
 
 # ---------------------------------------------------------
-# 2. Metaetiquetas PWA e Inyección HTML para iPhone y Android
+# 2. Metaetiquetas PWA & Inyección CSS Ultra-Responsiva
 # ---------------------------------------------------------
-pwa_meta_tags = """
-    <!-- Metaetiquetas para hacerlo PWA Instalable en iOS / Android -->
+st.markdown("""
+    <!-- Metaetiquetas PWA e iOS Safe Area -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="DashboardPro">
     <meta name="theme-color" content="#0f172a">
     <link rel="apple-touch-icon" href="https://img.icons8.com/isometric/512/dashboard.png">
-    
-    <!-- Manifiesto PWA Web App -->
     <link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIkRhc2hib2FyZCBQcm8gRGFpbHkiLAogICJzaG9ydF9uYW1lIjogIkRhc2hib2FyZFAiLAogICJzdGFydF91cmwiOiAiLi8iLAogICJkaXNwbGF5IjogInN0YW5kYWxvbmUiLAogICJiYWNrZ3JvdW5kX2NvbG9yIjogIiMwZjE3MmEiLAogICJ0aGVtZV9jb2xvciI6ICIjMGYxNzJhIiwKICAiaWNvbnMiOiBbCiAgICB7CiAgICAgICJzcmMiOiAiaHR0cHM6Ly9pbWcuaWNvbnM4LmNvbS9pc29tZXRyaWMvNTEyL2Rhc2hib2FyZC5wbmciLAogICAgICAic2l6ZXMiOiAiNTEyeDUxMiIsCiAgICAgICJ0eXBlIjogImltYWdlL3BuZyIKICAgIH0KICBdCn0=">
-"""
 
-st.markdown(pwa_meta_tags, unsafe_allow_html=True)
-
-# ---------------------------------------------------------
-# 3. Estilos CSS Avanzados
-# ---------------------------------------------------------
-st.markdown("""
     <style>
+        /* Fondo general */
         .stApp {
             background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 40%, #31103f 100%);
             color: #f8fafc;
         }
+
+        /* Ajustes de contenedores para pantallas pequeñas */
+        .main .block-container {
+            padding-left: 0.75rem !important;
+            padding-right: 0.75rem !important;
+            padding-top: 1rem !important;
+            padding-bottom: 2rem !important;
+            max-width: 100% !important;
+        }
+
+        /* Ocultar elementos innecesarios en móviles */
+        #MainMenu {visibility: hidden;}
+        footer {visibility: hidden;}
+        header {visibility: hidden;}
+
+        /* Estilo de Tarjetas Glassmorphism táctiles */
         .metric-card {
-            background: rgba(30, 41, 59, 0.7);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 15px;
-            border-radius: 14px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-            margin-bottom: 10px;
+            background: rgba(30, 41, 59, 0.75);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            padding: 14px;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+            margin-bottom: 12px;
         }
+
+        /* Botones optimizados para toque táctil fácil */
         .stButton>button {
+            border-radius: 14px !important;
+            font-weight: 700 !important;
+            font-size: 0.95rem !important;
+            background: linear-gradient(90deg, #6366f1 0%, #a855f7 100%) !important;
+            color: white !important;
+            border: none !important;
+            width: 100% !important;
+            min-height: 48px !important; /* Altura ideal táctil móvil */
+            margin-top: 4px;
+            margin-bottom: 4px;
+        }
+        .stButton>button:active {
+            transform: scale(0.98);
+        }
+
+        /* Inputs y Selects táctiles */
+        .stTextInput>div>div>input, .stNumberInput>div>div>input, .stSelectbox>div>div>div, .stDateInput>div>div>input {
+            border-radius: 12px !important;
+            min-height: 44px !important;
+            background-color: rgba(15, 23, 42, 0.6) !important;
+            color: #f8fafc !important;
+            border: 1px solid rgba(255, 255, 255, 0.15) !important;
+        }
+
+        /* Tabs de navegación móvil mejoradas */
+        .stTabs [data-baseweb="tab-list"] {
+            gap: 6px;
+            background-color: rgba(15, 23, 42, 0.5);
+            padding: 6px;
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+
+        .stTabs [data-baseweb="tab"] {
+            height: 40px;
+            border-radius: 10px;
+            color: #94a3b8;
+            font-weight: 600;
+            font-size: 0.85rem;
+            padding: 0 12px;
+        }
+
+        .stTabs [aria-selected="true"] {
+            background-color: #6366f1 !important;
+            color: #ffffff !important;
+        }
+
+        /* Tablas adaptables */
+        .stDataFrame {
             border-radius: 12px;
-            font-weight: 700;
-            background: linear-gradient(90deg, #6366f1 0%, #a855f7 100%);
-            color: white;
-            border: none;
-            width: 100%;
-            padding: 0.5rem 1rem;
-            transition: 0.3s;
+            overflow: hidden;
         }
-        .stButton>button:hover {
-            transform: scale(1.01);
-            box-shadow: 0 0 12px rgba(168, 85, 247, 0.6);
-        }
+
+        /* Tipografía responsiva */
         @media (max-width: 640px) {
-            h1 { font-size: 1.6rem !important; }
-            h2 { font-size: 1.3rem !important; }
-            h3 { font-size: 1.1rem !important; }
-            .block-container {
-                padding-left: 1rem !important;
-                padding-right: 1rem !important;
-                padding-top: 1.5rem !important;
-            }
+            h1 { font-size: 1.4rem !important; }
+            h2 { font-size: 1.2rem !important; }
+            h3 { font-size: 1.0rem !important; }
         }
     </style>
 """, unsafe_allow_html=True)
 
 # ---------------------------------------------------------
-# 4. Inicialización y Base de Datos SQLite
+# 3. Inicialización y Base de Datos SQLite
 # ---------------------------------------------------------
 def init_db():
     conn = sqlite3.connect("database.db", check_same_thread=False)
     cursor = conn.cursor()
-    
     cursor.execute('''CREATE TABLE IF NOT EXISTS users (username TEXT PRIMARY KEY, password TEXT)''')
     cursor.execute('''CREATE TABLE IF NOT EXISTS tabaco (username TEXT, fecha TEXT, cigarros INTEGER, gasto REAL)''')
     cursor.execute('''CREATE TABLE IF NOT EXISTS finanzas (username TEXT, concepto TEXT, categoria TEXT, tipo TEXT, cantidad REAL, fecha TEXT)''')
@@ -128,74 +176,74 @@ def verificar_usuario(username, password):
     return False
 
 # ---------------------------------------------------------
-# 5. Autenticación (Login / Registro)
+# 4. Autenticación (Login / Registro Adaptado)
 # ---------------------------------------------------------
 if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
     st.session_state.username = ""
 
 if not st.session_state.logged_in:
-    st.markdown("<h1 style='text-align: center; color: #a855f7;'>📱 Dashboard Pro</h1>", unsafe_allow_html=True)
-    st.markdown("<p style='text-align: center; color: #94a3b8;'>Inicia sesión para gestionar tus datos guardados.</p>", unsafe_allow_html=True)
+    st.markdown("<h2 style='text-align: center; color: #a855f7; margin-top: 1rem;'>📱 Dashboard Pro</h2>", unsafe_allow_html=True)
+    st.markdown("<p style='text-align: center; color: #94a3b8; font-size: 0.9rem;'>Accede a tu panel personal desde tu móvil.</p>", unsafe_allow_html=True)
     
-    col_l1, col_l2, col_l3 = st.columns([0.1, 2, 0.1])
-    with col_l2:
-        tab_log, tab_reg = st.tabs(["🔑 Entrar", "📝 Registro"])
-        
-        with tab_log:
-            l_user = st.text_input("Usuario", key="l_user")
-            l_pass = st.text_input("Contraseña", type="password", key="l_pass")
-            if st.button("Iniciar Sesión", use_container_width=True):
-                if verificar_usuario(l_user, l_pass):
-                    st.session_state.logged_in = True
-                    st.session_state.username = l_user
-                    st.success("¡Acceso concedido!")
-                    st.rerun()
+    tab_log, tab_reg = st.tabs(["🔑 Entrar", "📝 Crear Cuenta"])
+    
+    with tab_log:
+        l_user = st.text_input("Usuario", key="l_user")
+        l_pass = st.text_input("Contraseña", type="password", key="l_pass")
+        if st.button("Iniciar Sesión", use_container_width=True):
+            if verificar_usuario(l_user, l_pass):
+                st.session_state.logged_in = True
+                st.session_state.username = l_user
+                st.success("¡Acceso concedido!")
+                st.rerun()
+            else:
+                st.error("Usuario o contraseña incorrectos.")
+                
+    with tab_reg:
+        r_user = st.text_input("Nuevo Usuario", key="r_user")
+        r_pass = st.text_input("Nueva Contraseña", type="password", key="r_pass")
+        if st.button("Registrarse", use_container_width=True):
+            if r_user and r_pass:
+                if registrar_usuario(r_user, r_pass):
+                    st.success("¡Cuenta creada! Ya puedes entrar.")
                 else:
-                    st.error("Datos incorrectos.")
-                    
-        with tab_reg:
-            r_user = st.text_input("Nuevo Usuario", key="r_user")
-            r_pass = st.text_input("Nueva Contraseña", type="password", key="r_pass")
-            if st.button("Registrarse", use_container_width=True):
-                if r_user and r_pass:
-                    if registrar_usuario(r_user, r_pass):
-                        st.success("¡Cuenta creada! Ya puedes iniciar sesión.")
-                    else:
-                        st.error("El usuario ya existe.")
-                else:
-                    st.warning("Rellena todos los campos.")
+                    st.error("El usuario ya existe.")
+            else:
+                st.warning("Rellena todos los campos.")
     st.stop()
 
 # ---------------------------------------------------------
-# 6. Panel Principal
+# 5. Panel Principal (Navegación Táctil Móvil)
 # ---------------------------------------------------------
 user = st.session_state.username
 conn = sqlite3.connect("database.db", check_same_thread=False)
 
-st.sidebar.title(f"👤 Hola, {user}")
-if st.sidebar.button("🚪 Cerrar Sesión", use_container_width=True):
-    st.session_state.logged_in = False
-    st.session_state.username = ""
-    st.rerun()
+# Cabecera Móvil Compacta
+col_head1, col_head2 = st.columns([3, 1])
+with col_head1:
+    st.markdown(f"👤 **{user}**")
+with col_head2:
+    if st.button("🚪 Salir", use_container_width=True):
+        st.session_state.logged_in = False
+        st.session_state.username = ""
+        st.rerun()
 
-st.sidebar.divider()
-seccion = st.sidebar.radio(
-    "Menú de Navegación",
-    ["📖 Diario Personal", "🚬 Tabaco", "💶 Finanzas", "🛒 Compras", "🏃 Deporte"]
-)
+# Menú por Pestañas Horizontales (Súper cómodo para móviles)
+tab_diario, tab_tabaco, tab_finanzas, tab_compras, tab_deporte = st.tabs([
+    "📖 Diario", "🚬 Tabaco", "💶 Dinero", "🛒 Compra", "🏃 Deporte"
+])
 
 # =========================================================
 # SECCIÓN 1: DIARIO
 # =========================================================
-if seccion == "📖 Diario Personal":
-    st.title("📖 Diario del Día")
-    
+with tab_diario:
+    st.markdown("### 📖 Diario del Día")
     f_diario = st.date_input("Fecha:", datetime.date.today(), key="f_diario")
     animo = st.selectbox("Ánimo:", ["😄 Increíble", "🙂 Tranquilo", "😴 Cansado", "😤 Estresado", "💪 Motivado"])
-    resumen_texto = st.text_area("¿Qué has hecho hoy?", placeholder="Resume tu día...")
+    resumen_texto = st.text_area("¿Qué has hecho hoy?", placeholder="Escribe tu día aquí...", height=120)
     
-    if st.button("💾 Guardar Entrada", use_container_width=True):
+    if st.button("💾 Guardar Diario", use_container_width=True):
         cursor = conn.cursor()
         cursor.execute("INSERT OR REPLACE INTO diario (username, fecha, animo, resumen) VALUES (?, ?, ?, ?)",
                        (user, str(f_diario), animo, resumen_texto))
@@ -204,7 +252,7 @@ if seccion == "📖 Diario Personal":
         st.rerun()
 
     st.divider()
-    st.subheader("📜 Entradas Recientes")
+    st.markdown("#### 📜 Entradas Anteriores")
     df_diario = pd.read_sql_query("SELECT fecha as Fecha, animo as Ánimo, resumen as Resumen FROM diario WHERE username = ? ORDER BY fecha DESC", conn, params=(user,))
     if not df_diario.empty:
         for _, row in df_diario.iterrows():
@@ -216,9 +264,8 @@ if seccion == "📖 Diario Personal":
 # =========================================================
 # SECCIÓN 2: TABACO
 # =========================================================
-elif seccion == "🚬 Tabaco":
-    st.title("🚬 Control de Tabaco")
-    
+with tab_tabaco:
+    st.markdown("### 🚬 Control de Tabaco")
     f_tab = st.date_input("Fecha:", datetime.date.today(), key="f_tab")
     n_cig = st.number_input("Cigarros fumados:", min_value=0, value=5)
     p_caj = st.number_input("Precio cajetilla (20 uds):", value=5.0)
@@ -229,14 +276,17 @@ elif seccion == "🚬 Tabaco":
         cursor.execute("DELETE FROM tabaco WHERE username = ? AND fecha = ?", (user, str(f_tab)))
         cursor.execute("INSERT INTO tabaco (username, fecha, cigarros, gasto) VALUES (?, ?, ?, ?)", (user, str(f_tab), n_cig, gasto))
         conn.commit()
-        st.success("¡Actualizado!")
+        st.success("¡Consumo guardado!")
         st.rerun()
 
     st.divider()
     df_tab = pd.read_sql_query("SELECT fecha as Fecha, cigarros as Cigarros, gasto as 'Gasto (€)' FROM tabaco WHERE username = ? ORDER BY fecha ASC", conn, params=(user,))
     if not df_tab.empty:
-        st.metric("Total Cigarros", int(df_tab["Cigarros"].sum()))
-        st.metric("Gasto Total", f"{df_tab['Gasto (€)'].sum():.2f} €")
+        mc1, mc2 = st.columns(2)
+        with mc1:
+            st.metric("Total Cigarros", int(df_tab["Cigarros"].sum()))
+        with mc2:
+            st.metric("Gasto Total", f"{df_tab['Gasto (€)'].sum():.2f} €")
         st.bar_chart(df_tab.set_index("Fecha")["Cigarros"])
     else:
         st.info("Sin registros de tabaco.")
@@ -244,9 +294,8 @@ elif seccion == "🚬 Tabaco":
 # =========================================================
 # SECCIÓN 3: FINANZAS
 # =========================================================
-elif seccion == "💶 Finanzas":
-    st.title("💶 Dinero Personal")
-    
+with tab_finanzas:
+    st.markdown("### 💶 Dinero Personal")
     concepto = st.text_input("Concepto:")
     categoria = st.selectbox("Categoría:", ["🛒 Alimentación", "🏡 Hogar", "🚗 Transporte", "🎉 Ocio", "💼 Nómina", "💸 Varios"])
     tipo = st.selectbox("Tipo:", ["Gasto", "Ingreso"])
@@ -257,7 +306,7 @@ elif seccion == "💶 Finanzas":
         cursor.execute("INSERT INTO finanzas (username, concepto, categoria, tipo, cantidad, fecha) VALUES (?, ?, ?, ?, ?, ?)", 
                        (user, concepto, categoria, tipo, cantidad, str(datetime.date.today())))
         conn.commit()
-        st.success("¡Registrado!")
+        st.success("¡Movimiento guardado!")
         st.rerun()
 
     st.divider()
@@ -270,15 +319,14 @@ elif seccion == "💶 Finanzas":
         st.metric("Balance Neto", f"{balance:.2f} €")
         st.dataframe(df_fin, use_container_width=True)
     else:
-        st.info("Sin movimientos financieros.")
+        st.info("Sin registros financieros.")
 
 # =========================================================
 # SECCIÓN 4: COMPRAS
 # =========================================================
-elif seccion == "🛒 Compras":
-    st.title("🛒 Lista de la Compra")
-    
-    nuevo_item = st.text_input("Añadir producto:", placeholder="Ej: Leche, Huevos...")
+with tab_compras:
+    st.markdown("### 🛒 Lista de la Compra")
+    nuevo_item = st.text_input("Añadir producto:", placeholder="Ej: Leche, Café, Huevos...")
     if st.button("➕ Añadir a la lista", use_container_width=True) and nuevo_item:
         cursor = conn.cursor()
         cursor.execute("INSERT INTO compras (username, item, comprado) VALUES (?, ?, 0)", (user, nuevo_item))
@@ -309,14 +357,13 @@ elif seccion == "🛒 Compras":
                     conn.commit()
                     st.rerun()
     else:
-        st.info("La lista está vacía.")
+        st.info("Lista vacía.")
 
 # =========================================================
 # SECCIÓN 5: DEPORTE
 # =========================================================
-elif seccion == "🏃 Deporte":
-    st.title("🏃 Actividad Física")
-    
+with tab_deporte:
+    st.markdown("### 🏃 Actividad Física")
     f_dep = st.date_input("Fecha:", datetime.date.today(), key="fd")
     act = st.text_input("Actividad (Ej: Gimnasio, Bici):")
     cal = st.number_input("Calorías (kcal):", min_value=0, value=300)
@@ -333,6 +380,6 @@ elif seccion == "🏃 Deporte":
     if not df_dep.empty:
         st.dataframe(df_dep, use_container_width=True)
     else:
-        st.info("Sin entrenamientos registrados.")
+        st.info("Sin entrenamientos guardados.")
 
 conn.close()
