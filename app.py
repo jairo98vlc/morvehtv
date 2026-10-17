@@ -5,17 +5,35 @@ import sqlite3
 import hashlib
 
 # ---------------------------------------------------------
-# 1. Configuración de la página (Optimizada para móviles)
+# 1. Configuración de la página (Optimizada para PWA)
 # ---------------------------------------------------------
 st.set_page_config(
-    page_title="Dashboard Pro | Móvil & PC",
+    page_title="Dashboard Pro",
     page_icon="📱",
     layout="wide",
     initial_sidebar_state="collapsed"
 )
 
 # ---------------------------------------------------------
-# 2. Estilos CSS Avanzados y Responsivos para Móviles
+# 2. Metaetiquetas PWA e Inyección HTML para iPhone y Android
+# ---------------------------------------------------------
+pwa_meta_tags = """
+    <!-- Metaetiquetas para hacerlo PWA Instalable en iOS / Android -->
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="DashboardPro">
+    <meta name="theme-color" content="#0f172a">
+    <link rel="apple-touch-icon" href="https://img.icons8.com/isometric/512/dashboard.png">
+    
+    <!-- Manifiesto PWA Web App -->
+    <link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIkRhc2hib2FyZCBQcm8gRGFpbHkiLAogICJzaG9ydF9uYW1lIjogIkRhc2hib2FyZFAiLAogICJzdGFydF91cmwiOiAiLi8iLAogICJkaXNwbGF5IjogInN0YW5kYWxvbmUiLAogICJiYWNrZ3JvdW5kX2NvbG9yIjogIiMwZjE3MmEiLAogICJ0aGVtZV9jb2xvciI6ICIjMGYxNzJhIiwKICAiaWNvbnMiOiBbCiAgICB7CiAgICAgICJzcmMiOiAiaHR0cHM6Ly9pbWcuaWNvbnM4LmNvbS9pc29tZXRyaWMvNTEyL2Rhc2hib2FyZC5wbmciLAogICAgICAic2l6ZXMiOiAiNTEyeDUxMiIsCiAgICAgICJ0eXBlIjogImltYWdlL3BuZyIKICAgIH0KICBdCn0=">
+"""
+
+st.markdown(pwa_meta_tags, unsafe_allow_html=True)
+
+# ---------------------------------------------------------
+# 3. Estilos CSS Avanzados
 # ---------------------------------------------------------
 st.markdown("""
     <style>
@@ -53,14 +71,14 @@ st.markdown("""
             .block-container {
                 padding-left: 1rem !important;
                 padding-right: 1rem !important;
-                padding-top: 2rem !important;
+                padding-top: 1.5rem !important;
             }
         }
     </style>
 """, unsafe_allow_html=True)
 
 # ---------------------------------------------------------
-# 3. Inicialización y Base de Datos SQLite
+# 4. Inicialización y Base de Datos SQLite
 # ---------------------------------------------------------
 def init_db():
     conn = sqlite3.connect("database.db", check_same_thread=False)
@@ -110,15 +128,15 @@ def verificar_usuario(username, password):
     return False
 
 # ---------------------------------------------------------
-# 4. Autenticación (Login / Registro)
+# 5. Autenticación (Login / Registro)
 # ---------------------------------------------------------
 if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
     st.session_state.username = ""
 
 if not st.session_state.logged_in:
-    st.markdown("<h1 style='text-align: center; color: #a855f7;'>📱 Dashboard Pro Móvil</h1>", unsafe_allow_html=True)
-    st.markdown("<p style='text-align: center; color: #94a3b8;'>Accede a tu control personal desde cualquier dispositivo.</p>", unsafe_allow_html=True)
+    st.markdown("<h1 style='text-align: center; color: #a855f7;'>📱 Dashboard Pro</h1>", unsafe_allow_html=True)
+    st.markdown("<p style='text-align: center; color: #94a3b8;'>Inicia sesión para gestionar tus datos guardados.</p>", unsafe_allow_html=True)
     
     col_l1, col_l2, col_l3 = st.columns([0.1, 2, 0.1])
     with col_l2:
@@ -150,7 +168,7 @@ if not st.session_state.logged_in:
     st.stop()
 
 # ---------------------------------------------------------
-# 5. Panel Principal y Menú
+# 6. Panel Principal
 # ---------------------------------------------------------
 user = st.session_state.username
 conn = sqlite3.connect("database.db", check_same_thread=False)
