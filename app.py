@@ -447,38 +447,47 @@ with tab_deporte:
         st.info("Sin registros de entrenamiento.")
 
 # =========================================================
-# SECCIÓN 8: METAS PRIVADAS
+# SECCIÓN 8: METAS PRIVADAS (ACTUALIZADO CON ESTADO VISUAL)
 # =========================================================
 with tab_metas:
-    st.markdown("### 🎯 Metas y Objetivos")
+    st.markdown("### 🎯 Metas y Objetivos Personales")
     nueva_meta = st.text_input("Nueva meta:", placeholder="Ej: Ahorrar 500€, Leer 5 libros...")
     if st.button("➕ Añadir Meta", use_container_width=True) and nueva_meta:
         cursor = conn.cursor()
-        cursor.execute("INSERT INTO metas (username, meta, estado) VALUES (?, ?, 0)", (user, nueva_meta))
+        cursor.execute("INSERT INTO metas (username, meta, estado) VALUES (?, ?, '0')", (user, nueva_meta))
         conn.commit()
         st.rerun()
 
     st.divider()
     df_metas = pd.read_sql_query("SELECT id, meta, estado FROM metas WHERE username = ?", conn, params=(user,))
+    
     if not df_metas.empty:
         for _, row in df_metas.iterrows():
             m_id = row['id']
             m_text = row['meta']
-            m_est = bool(row['estado'])
+            m_est = True if str(row['estado']) == '1' else False
             
-            cm1, cm2 = st.columns([4, 1])
+            cm1, cm2, cm3 = st.columns([3, 1, 1])
             with cm1:
                 completada = st.checkbox(m_text, value=m_est, key=f"meta_{m_id}")
                 if completada != m_est:
                     cursor = conn.cursor()
-                    cursor.execute("UPDATE metas SET estado = ? WHERE id = ?", (1 if completada else 0, m_id))
+                    cursor.execute("UPDATE metas SET estado = ? WHERE id = ?", ('1' if completada else '0', m_id))
                     conn.commit()
                     st.rerun()
             with cm2:
-                if st.button("🗑️", key=f"del_meta_{m_id}"):
+                # Indicador visual claro del estado de la meta
+                if completada:
+                    st.markdown("<span style='color: #4ade80; font-weight: 700;'>✅ Completada</span>", unsafe_allow_html=True)
+                else:
+                    st.markdown("<span style='color: #facc15; font-weight: 600;'>⏳ Pendiente</span>", unsafe_allow_html=True)
+            with cm3:
+                if st.button("🗑️ Borrar", key=f"del_meta_{m_id}"):
                     cursor = conn.cursor()
                     cursor.execute("DELETE FROM metas WHERE id = ?", (m_id,))
                     conn.commit()
                     st.rerun()
+    else:
+        st.info("No tienes metas registradas. ¡Añade tu primer objetivo arriba!")
 
 conn.close()
