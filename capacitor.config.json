@@ -1,9 +1,0 @@
-{
-  "appId": "com.jairo.lifedashboard",
-  "appName": "Life Dashboard Pro",
-  "webDir": "www",
-  "server": {
-    "url": "https://morvehtv.streamlit.app",
-    "cleartext": true
-  }
-}
