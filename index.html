@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html lang="es" class="dark scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MorvehTV - Servicio Emby Premium | Streaming 4K sin cortes</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts Inter & Outfit -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@600;700;800;900&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f5f3ff',
+                            500: '#8b5cf6',
+                            600: '#7c3aed',
+                            700: '#6d28d9',
+                            green: '#10b981',
+                            accent: '#a855f7'
+                        },
+                        darkBg: '#0b0c10',
+                        darkCard: '#13151b',
+                        darkHover: '#1c1e26'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        heading: ['Outfit', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        'neon-purple': '0 0 25px -5px rgba(139, 92, 246, 0.4)',
+                        'neon-green': '0 0 20px -5px rgba(16, 185, 129, 0.4)',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #0b0c10;
+            color: #e2e8f0;
+            font-family: 'Inter', sans-serif;
+        }
+        h1, h2, h3, h4, .font-heading {
+            font-family: 'Outfit', sans-serif;
+        }
+        .gradient-text {
+            background: linear-gradient(135deg, #a855f7 0%, #8b5cf6 50%, #ec4899 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .glow-effect {
+            position: relative;
+        }
+        .glow-effect::before {
+            content: '';
+            position: absolute;
+            top: -2px; left: -2px; right: -2px; bottom: -2px;
+            background: linear-gradient(45deg, #7c3aed, #ec4899, #10b981);
+            border-radius: 1rem;
+            z-index: -1;
+            filter: blur(10px);
+            opacity: 0.35;
+            transition: opacity 0.3s ease;
+        }
+        .glow-effect:hover::before {
+            opacity: 0.7;
+        }
+    </style>
+</head>
+<body class="antialiased selection:bg-brand-500 selection:text-white">
+
+    <!-- CONFIGURACIÓN DE REDES -->
+    <script>
+        const TELEGRAM_USERNAME = "LuZy88CT"; // Usuario de Telegram sin @
+    </script>
+
+    <!-- HEADER / NAVBAR -->
+    <header class="fixed top-0 left-0 w-full z-40 bg-darkBg/90 backdrop-blur-md border-b border-gray-800/80">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+            
+            <!-- Logo -->
+            <a href="#" class="flex items-center gap-3 group">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 to-purple-400 flex items-center justify-center text-white font-extrabold text-xl shadow-neon-purple group-hover:scale-105 transition-transform">
+                    M
+                </div>
+                <div class="flex flex-col">
+                    <span class="font-heading font-black text-2xl tracking-wider text-white">MORVEH<span class="text-brand-500">TV</span></span>
+                    <span class="text-[10px] text-gray-400 tracking-widest uppercase -mt-1">Servicio Emby Premium</span>
+                </div>
+            </a>
+
+            <!-- Navegación Desktop -->
+            <nav class="hidden md:flex items-center gap-8 text-sm font-semibold text-gray-300">
+                <a href="#caracteristicas" class="hover:text-brand-500 transition-colors">Características</a>
+                <a href="#planes" class="hover:text-brand-500 transition-colors">Planes y Precios</a>
+                <a href="#dispositivos" class="hover:text-brand-500 transition-colors">Dispositivos</a>
+                <a href="#faq" class="hover:text-brand-500 transition-colors">Preguntas Frecuentes</a>
+            </nav>
+
+            <!-- Acciones Header -->
+            <div class="hidden sm:flex items-center gap-4">
+                <button onclick="openDemoModal()" class="px-5 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider text-white bg-brand-600 hover:bg-brand-500 transition-all shadow-neon-purple flex items-center gap-2">
+                    <i class="fa-solid fa-clock text-yellow-400 animate-pulse"></i> Demo 6h Gratis
+                </button>
+            </div>
+
+            <!-- Botón Menú Mobile -->
+            <button id="mobile-menu-btn" class="md:hidden text-gray-300 hover:text-white text-2xl">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+        </div>
+
+        <!-- Menú Desplegable Mobile -->
+        <div id="mobile-menu" class="hidden md:hidden bg-darkCard border-b border-gray-800 px-4 py-6 space-y-4">
+            <a href="#caracteristicas" class="block text-gray-300 hover:text-white font-medium">Características</a>
+            <a href="#planes" class="block text-gray-300 hover:text-white font-medium">Planes y Precios</a>
+            <a href="#dispositivos" class="block text-gray-300 hover:text-white font-medium">Dispositivos</a>
+            <a href="#faq" class="block text-gray-300 hover:text-white font-medium">Preguntas Frecuentes</a>
+            <div class="pt-4 border-t border-gray-800">
+                <button onclick="openDemoModal()" class="w-full py-3 rounded-xl text-sm font-bold uppercase text-white bg-brand-600 hover:bg-brand-500 transition-all flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-clock text-yellow-400"></i> Solicitar Demo 6 Horas
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- HERO SECTION -->
+    <section class="relative pt-36 pb-20 md:pt-48 md:pb-32 overflow-hidden">
+        <!-- Fondos de luz neón de fondo -->
+        <div class="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-brand-600/20 rounded-full blur-[120px] pointer-events-none"></div>
+        <div class="absolute top-1/3 right-10 w-[300px] h-[300px] bg-purple-600/15 rounded-full blur-[100px] pointer-events-none"></div>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
+            
+            <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-brand-500/10 border border-brand-500/30 text-brand-500 text-xs sm:text-sm font-semibold mb-8 animate-bounce">
+                <span class="w-2 h-2 rounded-full bg-brand-green"></span>
+                Servidores Emby Ultra-Rápidos de Alta Calidad
+            </div>
+
+            <h1 class="text-4xl sm:text-6xl md:text-7xl font-black text-white tracking-tight max-w-4xl mx-auto leading-none mb-6">
+                Tu Entretenimiento Sin Límites en <span class="gradient-text">MorvehTV</span>
+            </h1>
+
+            <p class="text-base sm:text-xl text-gray-400 max-w-2xl mx-auto mb-10 leading-relaxed">
+                Disfruta del mejor catálogo de películas, series y contenido bajo demanda en máxima calidad <strong>4K UHD y FHD</strong>. Sin cortes y con la mejor fluidez.
+            </p>
+
+            <!-- Botones Principales Hero -->
+            <div class="flex flex-col sm:flex-row items-center justify-center gap-4 max-w-md mx-auto">
+                <a href="#planes" class="w-full sm:w-auto px-8 py-4 rounded-2xl font-extrabold text-white bg-brand-600 hover:bg-brand-500 transition-all transform hover:-translate-y-0.5 shadow-neon-purple text-base flex items-center justify-center gap-3">
+                    <i class="fa-solid fa-fire text-yellow-400"></i> Ver Planes y Tarifas
+                </a>
+                <button onclick="openDemoModal()" class="w-full sm:w-auto px-8 py-4 rounded-2xl font-bold text-gray-200 bg-darkCard hover:bg-darkHover border border-gray-700 hover:border-brand-500 transition-all text-base flex items-center justify-center gap-3">
+                    <i class="fa-solid fa-flask text-brand-500"></i> Probar Demo 6h
+                </button>
+            </div>
+
+            <!-- Badges destacados -->
+            <div class="mt-16 pt-8 border-t border-gray-800/60 grid grid-cols-2 md:grid-cols-4 gap-6 text-left max-w-4xl mx-auto">
+                <div class="flex items-center gap-3">
+                    <i class="fa-solid fa-bolt text-brand-500 text-2xl"></i>
+                    <div>
+                        <h4 class="text-sm font-bold text-white">Activación Veloz</h4>
+                        <p class="text-xs text-gray-400">En cuestión de minutos</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3">
+                    <i class="fa-solid fa-tv text-brand-500 text-2xl"></i>
+                    <div>
+                        <h4 class="text-sm font-bold text-white">Calidad 4K / FHD</h4>
+                        <p class="text-xs text-gray-400">Máxima definición</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3">
+                    <i class="fa-solid fa-headset text-brand-500 text-2xl"></i>
+                    <div>
+                        <h4 class="text-sm font-bold text-white">Soporte Directo</h4>
+                        <p class="text-xs text-gray-400">Atención en Telegram</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3">
+                    <i class="fa-solid fa-shield-halved text-brand-500 text-2xl"></i>
+                    <div>
+                        <h4 class="text-sm font-bold text-white">100% Estabilidad</h4>
+                        <p class="text-xs text-gray-400">Servidores propios</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- BANNER DEMO 6 HORAS DESTACADO -->
+    <section class="py-12 bg-gradient-to-r from-brand-900/30 via-darkCard to-brand-900/30 border-y border-brand-500/20 relative overflow-hidden">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-8">
+            <div class="flex items-center gap-5">
+                <div class="w-16 h-16 rounded-2xl bg-brand-600/20 border border-brand-500/40 flex items-center justify-center text-brand-500 text-3xl shrink-0">
+                    <i class="fa-solid fa-gift"></i>
+                </div>
+                <div>
+                    <span class="text-xs font-bold text-brand-500 uppercase tracking-widest">¿Aún no nos has probado?</span>
+                    <h3 class="text-2xl sm:text-3xl font-black text-white">Solicita tu Prueba Gratuita de 6 Horas</h3>
+                    <p class="text-sm text-gray-400 mt-1">Comprueba la velocidad y calidad de nuestro catálogo antes de contratar cualquier plan.</p>
+                </div>
+            </div>
+            <button onclick="openDemoModal()" class="w-full md:w-auto px-8 py-4 rounded-2xl font-extrabold text-white bg-brand-green hover:bg-emerald-600 transition-all shadow-neon-green shrink-0 text-center flex items-center justify-center gap-3">
+                <i class="fa-solid fa-paper-plane"></i> Pedir Demo Ahora
+            </button>
+        </div>
+    </section>
+
+    <!-- CARACTERÍSTICAS -->
+    <section id="caracteristicas" class="py-24 bg-darkBg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-3xl mx-auto mb-16">
+                <h2 class="text-xs font-bold text-brand-500 uppercase tracking-widest mb-3">¿Por qué elegir MorvehTV?</h2>
+                <p class="text-3xl sm:text-5xl font-black text-white">Diseñado para la mejor experiencia de streaming</p>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-8">
+                <!-- Tarjeta 1 -->
+                <div class="p-8 rounded-3xl bg-darkCard border border-gray-800 hover:border-brand-500/50 transition-all hover:-translate-y-1">
+                    <div class="w-14 h-14 rounded-2xl bg-brand-500/10 border border-brand-500/20 flex items-center justify-center text-brand-500 text-2xl mb-6">
+                        <i class="fa-solid fa-film"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-3">Catálogo Actualizado</h3>
+                    <p class="text-sm text-gray-400 leading-relaxed">
+                        Añadimos constantemente los últimos estrenos de cine, series completas y documentales en la mejor resolución disponible.
+                    </p>
+                </div>
+
+                <!-- Tarjeta 2 -->
+                <div class="p-8 rounded-3xl bg-darkCard border border-gray-800 hover:border-brand-500/50 transition-all hover:-translate-y-1">
+                    <div class="w-14 h-14 rounded-2xl bg-brand-500/10 border border-brand-500/20 flex items-center justify-center text-brand-500 text-2xl mb-6">
+                        <i class="fa-solid fa-laptop-house"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-3">Multi-Conexión</h3>
+                    <p class="text-sm text-gray-400 leading-relaxed">
+                        Elige planes de 1 o 2 conexiones simultáneas para disfrutar de tu contenido en diferentes habitaciones o dispositivos al mismo tiempo.
+                    </p>
+                </div>
+
+                <!-- Tarjeta 3 -->
+                <div class="p-8 rounded-3xl bg-darkCard border border-gray-800 hover:border-brand-500/50 transition-all hover:-translate-y-1">
+                    <div class="w-14 h-14 rounded-2xl bg-brand-500/10 border border-brand-500/20 flex items-center justify-center text-brand-500 text-2xl mb-6">
+                        <i class="fa-solid fa-microchip"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-3">Servidores Dedicados</h3>
+                    <p class="text-sm text-gray-400 leading-relaxed">
+                        Infraestructura optimizada con ancho de banda de alta velocidad para garantizar cero búfer y reproducción instantánea.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECCIÓN DE PLANES Y PRECIOS -->
+    <section id="planes" class="py-24 bg-darkCard relative">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            
+            <div class="text-center max-w-3xl mx-auto mb-16">
+                <span class="text-xs font-bold text-brand-500 uppercase tracking-widest mb-3 block">Precios Transparentes</span>
+                <h2 class="text-3xl sm:text-5xl font-black text-white">Elige el Plan Perfecto para Ti</h2>
+                <p class="text-gray-400 mt-4 text-sm sm:text-base">Sin permanencias ni comisiones ocultas. Cancela o renueva cuando quieras.</p>
+            </div>
+
+            <div class="grid lg:grid-cols-3 gap-8 items-stretch">
+                
+                <!-- PLAN 1 MES -->
+                <div class="rounded-3xl bg-darkBg border border-gray-800 p-8 flex flex-col justify-between hover:border-brand-500/50 transition-all">
+                    <div>
+                        <div class="flex justify-between items-center mb-4">
+                            <span class="text-xs font-bold uppercase tracking-wider text-brand-500 bg-brand-500/10 px-3 py-1 rounded-full">Mensual</span>
+                        </div>
+                        <h3 class="text-2xl font-black text-white mb-6">1 MES</h3>
+
+                        <!-- Opciones de Conexión -->
+                        <div class="space-y-4 mb-8">
+                            <div class="p-4 rounded-2xl bg-darkCard border border-gray-800/80 hover:border-brand-500/40 transition-all flex justify-between items-center">
+                                <div>
+                                    <span class="text-sm font-semibold text-white block">🔹 1 Conexión</span>
+                                    <span class="text-xs text-gray-400">1 Dispositivo individual</span>
+                                </div>
+                                <div class="text-right">
+                                    <span class="text-2xl font-black text-white">5€</span>
+                                </div>
+                            </div>
+
+                            <div class="p-4 rounded-2xl bg-darkCard border border-gray-800/80 hover:border-brand-500/40 transition-all flex justify-between items-center">
+                                <div>
+                                    <span class="text-sm font-semibold text-white block">🔸 2 Conexiones</span>
+                                    <span class="text-xs text-gray-400">2 Dispositivos a la vez</span>
+                                </div>
+                                <div class="text-right">
+                                    <span class="text-2xl font-black text-white">8€</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <ul class="space-y-3 text-sm text-gray-300 mb-8">
+                            <li class="flex items-center gap-3"><i class="fa-solid fa-check text-brand-green"></i> Todo el catálogo HD/4K</li>
+                            <li class="flex items-center gap-3"><i class="fa-solid fa-check text-brand-green"></i> Multi-dispositivo soportado</li>
+                            <li class="flex items-center gap-3"><i class="fa-solid fa-check text-brand-green"></i> Soporte técnico incluido</li>
+                        </ul>
+                    </div>
+
+                    <div class="space-y-3">
+                        <button onclick="selectPlan('1 Mes', '1 Conexión', '5€')" class="w-full py-3.5 rounded-xl font-bold bg-darkHover hover:bg-brand-600 text-white border border-gray-700 hover:border-brand-500 transition-all text-sm">
+                            Pedir 1 Conexión (5€)
+                        </button>
+                        <button onclick="selectPlan('1 Mes', '2 Conexiones', '8€')" class="w-full py-3.5 rounded-xl font-bold bg-darkHover hover:bg-brand-600 text-white border border-gray-700 hover:border-brand-500 transition-all text-sm">
+                            Pedir 2 Conexiones (8€)
+                        </button>
+                    </div>
+                </div>
+
+                <!-- PLAN 3 MESES (DESTACADO) -->
+                <div class="rounded-3xl bg-darkBg border-2 border-brand-500 p-8 flex flex-col justify-between relative shadow-neon-purple transform lg:-translate-y-2">
+                    <div class="absolute -top-4 left-1/2 -translate-x-1/2 bg-brand-600 text-white font-extrabold text-xs uppercase px-4 py-1.5 rounded-full shadow">
+                        Más Popular
+                    </div>
+                    <div>
+                        <div class="flex justify-between items-center mb-4 mt-2">
+                            <span class="text-xs font-bold uppercase tracking-wider text-brand-500 bg-brand-500/10 px-3 py-1 rounded-full">Trimestral</span>
+                        </div>
+                        <h3 class="text-2xl font-black text-white mb-6">3 MESES</h3>
+
+                        <!-- Opciones de Conexión -->
+                        <div class="space-y-4 mb-8">
+                            <div class="p-4 rounded-2xl bg-darkCard border border-brand-500/30 flex justify-between items-center">
+                                <div>
+                                    <span class="text-sm font-semibold text-white block">🔹 1 Conexión</span>
+                                    <span class="text-xs text-gray-400">1 Dispositivo individual</span>
+                                </div>
+                                <div class="text-right">
+                                    <span class="text-2xl font-black text-white">12€</span>
+                                </div>
+                            </div>
+
+                            <div class="p-4 rounded-2xl bg-darkCard border border-brand-500/30 flex justify-between items-center">
+                                <div>
+                                    <span class="text-sm font-semibold text-white block">🔸 2 Conexiones</span>
+                                    <span class="text-xs text-gray-400">2 Dispositivos a la vez</span>
+                                </div>
+                                <div class="text-right">
+                                    <span class="text-2xl font-black text-white">20€</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <ul class="space-y-3 text-sm text-gray-300 mb-8">
+                            <li class="flex items-center gap-3"><i class="fa-solid fa-check text-brand-green"></i> Todo el catálogo HD/4K</li>
+                            <li class="flex items-center gap-3"><i class="fa-solid fa-check text-brand-green"></i> Ahorro respecto al plan mensual</li>
+                            <li class="flex items-center gap-3"><i class="fa-solid fa-check text-brand-green"></i> Soporte prioritario 24/7</li>
+                        </ul>
+                    </div>
+
+                    <div class="space-y-3">
+                        <button onclick="selectPlan('3 Meses', '1 Conexión', '12€')" class="w-full py-3.5 rounded-xl font-extrabold bg-brand-600 hover:bg-brand-500 text-white transition-all text-sm shadow-md">
+                            Pedir 1 Conexión (12€)
+                        </button>
+                        <button onclick="selectPlan('3 Meses', '2 Conexiones', '20€')" class="w-full py-3.5 rounded-xl font-extrabold bg-brand-600 hover:bg-brand-500 text-white transition-all text-sm shadow-md">
+                            Pedir 2 Conexiones (20€)
+                        </button>
+                    </div>
+                </div>
+
+                <!-- PLAN 12 MESES -->
+                <div class="rounded-3xl bg-darkBg border border-gray-800 p-8 flex flex-col justify-between hover:border-brand-500/50 transition-all">
+                    <div>
+                        <div class="flex justify-between items-center mb-4">
+                            <span class="text-xs font-bold uppercase tracking-wider text-brand-500 bg-brand-500/10 px-3 py-1 rounded-full">Anual</span>
+                            <span class="text-xs text-brand-green font-bold">Máximo Ahorro</span>
+                        </div>
+                        <h3 class="text-2xl font-black text-white mb-6">12 MESES</h3>
+
+                        <!-- Opciones de Conexión -->
+                        <div class="space-y-4 mb-8">
+                            <div class="p-4 rounded-2xl bg-darkCard border border-gray-800/80 hover:border-brand-500/40 transition-all flex justify-between items-center">
+                                <div>
+                                    <span class="text-sm font-semibold text-white block">🔹 1 Conexión</span>
+                                    <span class="text-xs text-gray-400">1 Dispositivo individual</span>
+                                </div>
+                                <div class="text-right">
+                                    <span class="text-2xl font-black text-white">40€</span>
+                                </div>
+                            </div>
+
+                            <div class="p-4 rounded-2xl bg-darkCard border border-gray-800/80 hover:border-brand-500/40 transition-all flex justify-between items-center">
+                                <div>
+                                    <span class="text-sm font-semibold text-white block">🔸 2 Conexiones</span>
+                                    <span class="text-xs text-gray-400">2 Dispositivos a la vez</span>
+                                </div>
+                                <div class="text-right">
+                                    <span class="text-2xl font-black text-white">70€</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <ul class="space-y-3 text-sm text-gray-300 mb-8">
+                            <li class="flex items-center gap-3"><i class="fa-solid fa-check text-brand-green"></i> Todo el catálogo HD/4K</li>
+                            <li class="flex items-center gap-3"><i class="fa-solid fa-check text-brand-green"></i> Precio congelado por 1 año</li>
+                            <li class="flex items-center gap-3"><i class="fa-solid fa-check text-brand-green"></i> Soporte VIP preferencial</li>
+                        </ul>
+                    </div>
+
+                    <div class="space-y-3">
+                        <button onclick="selectPlan('12 Meses', '1 Conexión', '40€')" class="w-full py-3.5 rounded-xl font-bold bg-darkHover hover:bg-brand-600 text-white border border-gray-700 hover:border-brand-500 transition-all text-sm">
+                            Pedir 1 Conexión (40€)
+                        </button>
+                        <button onclick="selectPlan('12 Meses', '2 Conexiones', '70€')" class="w-full py-3.5 rounded-xl font-bold bg-darkHover hover:bg-brand-600 text-white border border-gray-700 hover:border-brand-500 transition-all text-sm">
+                            Pedir 2 Conexiones (70€)
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- DISPOSITIVOS COMPATIBLES -->
+    <section id="dispositivos" class="py-20 bg-darkBg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h2 class="text-xs font-bold text-brand-500 uppercase tracking-widest mb-3">Multiplataforma</h2>
+            <p class="text-3xl font-black text-white mb-12">Compatible con todos tus dispositivos</p>
+
+            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-6">
+                <div class="p-6 rounded-2xl bg-darkCard border border-gray-800/80 flex flex-col items-center justify-center gap-3 hover:border-brand-500 transition-all">
+                    <i class="fa-solid fa-tv text-3xl text-brand-500"></i>
+                    <span class="text-sm font-bold text-white">Smart TV</span>
+                </div>
+                <div class="p-6 rounded-2xl bg-darkCard border border-gray-800/80 flex flex-col items-center justify-center gap-3 hover:border-brand-500 transition-all">
+                    <i class="fa-solid fa-fire text-3xl text-brand-500"></i>
+                    <span class="text-sm font-bold text-white">Fire TV Stick</span>
+                </div>
+                <div class="p-6 rounded-2xl bg-darkCard border border-gray-800/80 flex flex-col items-center justify-center gap-3 hover:border-brand-500 transition-all">
+                    <i class="fa-solid fa-mobile-screen text-3xl text-brand-500"></i>
+                    <span class="text-sm font-bold text-white">Android / iOS</span>
+                </div>
+                <div class="p-6 rounded-2xl bg-darkCard border border-gray-800/80 flex flex-col items-center justify-center gap-3 hover:border-brand-500 transition-all">
+                    <i class="fa-solid fa-desktop text-3xl text-brand-500"></i>
+                    <span class="text-sm font-bold text-white">Windows / Mac</span>
+                </div>
+                <div class="p-6 rounded-2xl bg-darkCard border border-gray-800/80 flex flex-col items-center justify-center gap-3 hover:border-brand-500 transition-all">
+                    <i class="fa-solid fa-box text-3xl text-brand-500"></i>
+                    <span class="text-sm font-bold text-white">Android TV Box</span>
+                </div>
+                <div class="p-6 rounded-2xl bg-darkCard border border-gray-800/80 flex flex-col items-center justify-center gap-3 hover:border-brand-500 transition-all">
+                    <i class="fa-solid fa-play text-3xl text-brand-500"></i>
+                    <span class="text-sm font-bold text-white">Emby App / Kodi</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ (PREGUNTAS FRECUENTES) -->
+    <section id="faq" class="py-24 bg-darkCard">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-xs font-bold text-brand-500 uppercase tracking-widest mb-3">Dudas Frecuentes</h2>
+                <p class="text-3xl font-black text-white">¿Tienes preguntas? Te las respondemos</p>
+            </div>
+
+            <div class="space-y-4">
+                <!-- FAQ 1 -->
+                <div class="rounded-2xl bg-darkBg border border-gray-800 overflow-hidden">
+                    <button onclick="toggleFaq(this)" class="w-full p-6 text-left font-bold text-white flex justify-between items-center focus:outline-none">
+                        <span>¿Qué es Emby y cómo funciona MorvehTV?</span>
+                        <i class="fa-solid fa-chevron-down text-brand-500 transition-transform"></i>
+                    </button>
+                    <div class="px-6 pb-6 text-sm text-gray-400 hidden leading-relaxed">
+                        Emby es una plataforma de centro multimedia de última generación. En MorvehTV te proporcionamos las credenciales privadas para que te conectes directamente a nuestros servidores de alta velocidad desde la app oficial de Emby en tu Smart TV, móvil o PC.
+                    </div>
+                </div>
+
+                <!-- FAQ 2 -->
+                <div class="rounded-2xl bg-darkBg border border-gray-800 overflow-hidden">
+                    <button onclick="toggleFaq(this)" class="w-full p-6 text-left font-bold text-white flex justify-between items-center focus:outline-none">
+                        <span>¿Cómo funciona la Demo de 6 Horas?</span>
+                        <i class="fa-solid fa-chevron-down text-brand-500 transition-transform"></i>
+                    </button>
+                    <div class="px-6 pb-6 text-sm text-gray-400 hidden leading-relaxed">
+                        Haz clic en el botón "Demo 6h Gratis", rellena tu usuario de preferencia y se generará una solicitud directa a nuestro Telegram (@LuZy88CT). Te enviaremos tus datos de prueba en un instante.
+                    </div>
+                </div>
+
+                <!-- FAQ 3 -->
+                <div class="rounded-2xl bg-darkBg border border-gray-800 overflow-hidden">
+                    <button onclick="toggleFaq(this)" class="w-full p-6 text-left font-bold text-white flex justify-between items-center focus:outline-none">
+                        <span>¿Puedo conectar varios dispositivos al mismo tiempo?</span>
+                        <i class="fa-solid fa-chevron-down text-brand-500 transition-transform"></i>
+                    </button>
+                    <div class="px-6 pb-6 text-sm text-gray-400 hidden leading-relaxed">
+                        Si contratas la opción de **1 Conexión**, podrás ver contenido en un dispositivo a la vez. Con la opción de **2 Conexiones**, podrás reproducir contenido simultáneamente en dos pantallas distintas (ej. en el salón y en la habitación).
+                    </div>
+                </div>
+
+                <!-- FAQ 4 -->
+                <div class="rounded-2xl bg-darkBg border border-gray-800 overflow-hidden">
+                    <button onclick="toggleFaq(this)" class="w-full p-6 text-left font-bold text-white flex justify-between items-center focus:outline-none">
+                        <span>¿Por qué no me abre Telegram automáticamente?</span>
+                        <i class="fa-solid fa-chevron-down text-brand-500 transition-transform"></i>
+                    </button>
+                    <div class="px-6 pb-6 text-sm text-gray-400 hidden leading-relaxed">
+                        En algunos móviles o navegadores muy estrictos se pueden bloquear las ventanas emergentes. Para evitar esto, hemos integrado dos botones dentro del formulario: uno directo para abrir la app y otro para copiar el texto con un solo clic.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="bg-darkBg border-t border-gray-800/80 py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-6">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-lg bg-brand-600 flex items-center justify-center text-white font-bold text-sm">M</div>
+                <span class="text-xl font-bold text-white">MORVEH<span class="text-brand-500">TV</span></span>
+            </div>
+            <p class="text-gray-500 text-sm text-center">
+                © <span id="year"></span> MorvehTV. Todos los derechos reservados.
+            </p>
+            <div class="flex gap-4 items-center">
+                <button onclick="openDemoModal()" class="text-xs text-brand-500 hover:underline">Solicitar Demo</button>
+                <a href="#planes" class="text-xs text-gray-400 hover:text-white">Ver Tarifas</a>
+                <a href="https://t.me/LuZy88CT" target="_blank" rel="noopener noreferrer" class="text-xs text-blue-400 hover:underline flex items-center gap-1">
+                    <i class="fa-brands fa-telegram"></i> @LuZy88CT
+                </a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- MODAL SOLICITUD DE DEMO 6 HORAS -->
+    <div id="demoModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+        <div class="bg-darkCard border border-brand-500/40 rounded-3xl p-6 sm:p-8 max-w-md w-full relative shadow-neon-purple">
+            <button onclick="closeDemoModal()" class="absolute top-5 right-5 text-gray-400 hover:text-white text-xl">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
+            <div class="text-center mb-6">
+                <span class="px-3 py-1 rounded-full bg-brand-500/10 text-brand-500 font-bold text-xs uppercase tracking-wider mb-2 inline-block">Prueba Sin Compromiso</span>
+                <h3 class="text-2xl font-black text-white">Demo 6 Horas Gratis</h3>
+                <p class="text-xs text-gray-400 mt-1">Completa los datos para preparar tu solicitud directa a Telegram (@LuZy88CT).</p>
+            </div>
+
+            <form id="demoForm" onsubmit="event.preventDefault();" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-gray-300 uppercase mb-1">Nombre o Alias</label>
+                    <input type="text" id="demoName" required placeholder="Ej. Alex" class="w-full px-4 py-3 rounded-xl bg-darkBg border border-gray-800 text-white focus:outline-none focus:border-brand-500 text-sm">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-gray-300 uppercase mb-1">Dispositivo a utilizar</label>
+                    <select id="demoDevice" class="w-full px-4 py-3 rounded-xl bg-darkBg border border-gray-800 text-white focus:outline-none focus:border-brand-500 text-sm">
+                        <option value="Smart TV (LG/Samsung)">Smart TV (LG, Samsung, Android TV)</option>
+                        <option value="Fire TV Stick">Fire TV Stick</option>
+                        <option value="Móvil Android / iPhone">Móvil (Android / iPhone)</option>
+                        <option value="PC / Portátil">PC / Portátil</option>
+                        <option value="TV Box">Android TV Box</option>
+                        <option value="Otro">Otro Dispositivo</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-gray-300 uppercase mb-1">Usuario Deseado para Emby</label>
+                    <input type="text" id="demoUser" required placeholder="Ej. alex_tv" class="w-full px-4 py-3 rounded-xl bg-darkBg border border-gray-800 text-white focus:outline-none focus:border-brand-500 text-sm">
+                </div>
+
+                <div class="pt-2 space-y-2">
+                    <!-- Botón Enlace Directo a Telegram -->
+                    <a id="demoTelegramBtn" href="https://t.me/LuZy88CT" target="_blank" rel="noopener noreferrer" onclick="updateDemoLink()" class="w-full py-3.5 rounded-xl font-bold bg-blue-600 hover:bg-blue-500 text-white text-sm flex items-center justify-center gap-2 transition-all shadow-md">
+                        <i class="fa-brands fa-telegram text-xl"></i> Abrir en Telegram
+                    </a>
+
+                    <!-- Botón Secundario de Respaldo por si el navegador bloquea ventanas -->
+                    <button type="button" onclick="copyAndOpenDemo()" class="w-full py-2.5 rounded-xl font-medium bg-darkBg hover:bg-gray-800 border border-gray-700 text-gray-300 text-xs flex items-center justify-center gap-2 transition-all">
+                        <i class="fa-regular fa-copy"></i> Copiar Mensaje y Abrir Telegram
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL SELECCIÓN DE PLAN Y SOLICITUD DIRECTA -->
+    <div id="planModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+        <div class="bg-darkCard border border-brand-500/40 rounded-3xl p-6 sm:p-8 max-w-md w-full relative shadow-neon-purple">
+            <button onclick="closePlanModal()" class="absolute top-5 right-5 text-gray-400 hover:text-white text-xl">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
+            <div class="text-center mb-6">
+                <span class="px-3 py-1 rounded-full bg-brand-500/10 text-brand-500 font-bold text-xs uppercase tracking-wider mb-2 inline-block">Suscripción</span>
+                <h3 class="text-2xl font-black text-white" id="modalPlanTitle">Plan Seleccionado</h3>
+                <p class="text-sm text-brand-accent font-bold mt-1" id="modalPlanDetails">--</p>
+            </div>
+
+            <div class="bg-darkBg p-4 rounded-2xl border border-gray-800 mb-6 space-y-2 text-sm text-gray-300">
+                <div class="flex justify-between">
+                    <span>Duración:</span>
+                    <strong class="text-white" id="summaryDuration">--</strong>
+                </div>
+                <div class="flex justify-between">
+                    <span>Conexiones:</span>
+                    <strong class="text-white" id="summaryConnections">--</strong>
+                </div>
+                <div class="flex justify-between border-t border-gray-800 pt-2 text-base">
+                    <span>Precio:</span>
+                    <strong class="text-brand-green font-black text-lg" id="summaryPrice">--</strong>
+                </div>
+            </div>
+
+            <p class="text-xs text-gray-400 mb-4 text-center">Contacta directamente con <strong>@LuZy88CT</strong> en Telegram para completar la activación:</p>
+
+            <div class="space-y-2">
+                <!-- Enlace Directo a Telegram -->
+                <a id="planTelegramBtn" href="https://t.me/LuZy88CT" target="_blank" rel="noopener noreferrer" class="w-full py-3.5 rounded-xl font-bold bg-blue-600 hover:bg-blue-500 text-white text-sm flex items-center justify-center gap-2 shadow-md transition-all">
+                    <i class="fa-brands fa-telegram text-xl"></i> Contratar por Telegram
+                </a>
+
+                <!-- Botón de respaldo -->
+                <button type="button" onclick="copyAndOpenPlan()" class="w-full py-2.5 rounded-xl font-medium bg-darkBg hover:bg-gray-800 border border-gray-700 text-gray-300 text-xs flex items-center justify-center gap-2 transition-all">
+                    <i class="fa-regular fa-copy"></i> Copiar Mensaje y Abrir Telegram
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- NOTIFICACIÓN TIPO TOAST PARA CONFIRMACIÓN DE COPIADO -->
+    <div id="toast" class="fixed bottom-6 right-6 z-50 hidden bg-brand-green text-white font-semibold text-xs px-4 py-3 rounded-xl shadow-lg flex items-center gap-2 animate-bounce">
+        <i class="fa-solid fa-circle-check"></i>
+        <span id="toastMsg">Mensaje copiado al portapapeles</span>
+    </div>
+
+    <!-- JAVASCRIPT LÓGICA INTERACTIVA -->
+    <script>
+        // Actualizar año copyright
+        document.getElementById('year').textContent = new Date().getFullYear();
+
+        // Toggle Menú Mobile
+        const mobileBtn = document.getElementById('mobile-menu-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+
+        mobileBtn.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
+
+        // Toggle Acordeón FAQ
+        function toggleFaq(btn) {
+            const content = btn.nextElementSibling;
+            const icon = btn.querySelector('i');
+            content.classList.toggle('hidden');
+            icon.classList.toggle('rotate-180');
+        }
+
+        // Mostrar notificación de toast
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            const toastMsg = document.getElementById('toastMsg');
+            toastMsg.textContent = message;
+            toast.classList.remove('hidden');
+            setTimeout(() => {
+                toast.classList.add('hidden');
+            }, 3000);
+        }
+
+        // Variables de estado del plan seleccionado
+        let currentSelectedPlan = {
+            duration: '',
+            connections: '',
+            price: ''
+        };
+
+        // Modal Demo 6H
+        function openDemoModal() {
+            document.getElementById('demoModal').classList.remove('hidden');
+            updateDemoLink();
+        }
+
+        function closeDemoModal() {
+            document.getElementById('demoModal').classList.add('hidden');
+        }
+
+        // Construcción del mensaje formateado para Demo
+        function getDemoMessage() {
+            const name = document.getElementById('demoName').value.trim() || 'No especificado';
+            const device = document.getElementById('demoDevice').value;
+            const user = document.getElementById('demoUser').value.trim() || 'Sin usuario';
+
+            return `👋 ¡Hola @LuZy88CT! Me gustaría solicitar una DEMO GRATUITA DE 6 HORAS para MorvehTV.\n\n` +
+                   `👤 Nombre: ${name}\n` +
+                   `📱 Dispositivo: ${device}\n` +
+                   `🔑 Usuario deseado para Emby: ${user}\n\n` +
+                   `Quedo a la espera de mis accesos. ¡Muchas gracias!`;
+        }
+
+        // Actualizar dinámicamente el href del enlace directo
+        function updateDemoLink() {
+            const message = getDemoMessage();
+            const link = `https://t.me/${TELEGRAM_USERNAME}?text=${encodeURIComponent(message)}`;
+            document.getElementById('demoTelegramBtn').setAttribute('href', link);
+        }
+
+        // Escuchar cambios en los inputs del formulario de Demo para mantener la URL actualizada
+        document.getElementById('demoName').addEventListener('input', updateDemoLink);
+        document.getElementById('demoDevice').addEventListener('change', updateDemoLink);
+        document.getElementById('demoUser').addEventListener('input', updateDemoLink);
+
+        // Copiar y abrir Telegram para Demo
+        function copyAndOpenDemo() {
+            const msg = getDemoMessage();
+            copyToClipboard(msg);
+            showToast("Mensaje copiado. Redirigiendo a Telegram...");
+            setTimeout(() => {
+                window.open(`https://t.me/${TELEGRAM_USERNAME}`, '_blank');
+            }, 800);
+        }
+
+        // Modal Seleccionar Plan
+        function selectPlan(duration, connections, price) {
+            currentSelectedPlan = { duration, connections, price };
+            
+            document.getElementById('modalPlanTitle').textContent = `Plan ${duration}`;
+            document.getElementById('modalPlanDetails').textContent = `${connections} por ${price}`;
+            document.getElementById('summaryDuration').textContent = duration;
+            document.getElementById('summaryConnections').textContent = connections;
+            document.getElementById('summaryPrice').textContent = price;
+
+            // Actualizar enlace de Telegram directo
+            const planMsg = getPlanMessage();
+            const link = `https://t.me/${TELEGRAM_USERNAME}?text=${encodeURIComponent(planMsg)}`;
+            document.getElementById('planTelegramBtn').setAttribute('href', link);
+
+            document.getElementById('planModal').classList.remove('hidden');
+        }
+
+        function closePlanModal() {
+            document.getElementById('planModal').classList.add('hidden');
+        }
+
+        // Construcción del mensaje formateado para contratación
+        function getPlanMessage() {
+            return `👋 ¡Hola @LuZy88CT! Quiero contratar el siguiente plan de suscripción Emby en MorvehTV:\n\n` +
+                   `📌 Plan: ${currentSelectedPlan.duration}\n` +
+                   `🔌 Conexiones: ${currentSelectedPlan.connections}\n` +
+                   `💰 Precio: ${currentSelectedPlan.price}\n\n` +
+                   `Por favor, facilítame las instrucciones para realizar el pago y activar mi cuenta.`;
+        }
+
+        // Copiar y abrir Telegram para contratación de Plan
+        function copyAndOpenPlan() {
+            const msg = getPlanMessage();
+            copyToClipboard(msg);
+            showToast("Mensaje copiado. Redirigiendo a Telegram...");
+            setTimeout(() => {
+                window.open(`https://t.me/${TELEGRAM_USERNAME}`, '_blank');
+            }, 800);
+        }
+
+        // Función portapapeles con fallback robusto
+        function copyToClipboard(text) {
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(text);
+            } else {
+                const textArea = document.createElement("textarea");
+                textArea.value = text;
+                textArea.style.position = "fixed";
+                textArea.style.left = "-999999px";
+                document.body.appendChild(textArea);
+                textArea.focus();
+                textArea.select();
+                try {
+                    document.execCommand('copy');
+                } catch (err) {
+                    console.error('Error al copiar al portapapeles', err);
+                }
+                document.body.removeChild(textArea);
+            }
+        }
+    </script>
+</body>
+</html>
